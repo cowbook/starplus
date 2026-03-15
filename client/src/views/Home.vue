@@ -28,13 +28,15 @@ export default {
         name: '',
         email: '',
         feedback: ''
-      }
+      },
+      // 根据环境变量或自动检测来确定 API 地址
+      apiBase: import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:3000`
     }
   },
   methods: {
     async submitForm() {
       try {
-        const response = await fetch('http://localhost:3000/submit', {
+        const response = await fetch(`${this.apiBase}/submit`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
