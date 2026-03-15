@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
+const { exec } = require('child_process');
 
 const app = express();
 const PORT = 3000;
@@ -25,6 +26,17 @@ app.post('/submit', (req, res) => {
       return res.status(500).send('Error saving submission');
     }
     res.send('Submission saved');
+  });
+});
+
+app.post('/webhook', (req, res) => {
+  exec('git pull --force origin main', { cwd: path.join(__dirname, '..') }, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Git pull error: ${error}`);
+      return res.status(500).send('Pull failed');
+    }
+    console.log(`Git pull output: ${stdout}`);
+    res.send('Pull successful');
   });
 });
 
