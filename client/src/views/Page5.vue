@@ -289,9 +289,11 @@ export default {
     width:100%;
     box-sizing: border-box;
     padding:20px 65px 20px 45px;
+    
 }
 
 .input-group {
+  width:100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -303,9 +305,10 @@ export default {
   background-color: #f9f9f9;
   border-radius: 8px;
   border: 1px solid #c8b08e55;
-  position: relative;
   height:18px;
   margin:0 0 12px 0;
+
+
 }
 
 .blue-border{

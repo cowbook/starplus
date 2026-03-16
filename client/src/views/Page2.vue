@@ -62,7 +62,7 @@ import btnStart from '../assets/page2_btnstart.svg'
 import arrow from '../assets/page2_arrow.png'
 import btnStar from '../assets/page2_btnstar_topright.png'
 import btnDown from '../assets/page2_btndown_topright.png'
-import footerText from '../assets/page2_text_footer.png'
+import footerText from '../assets/text.svg'
 import bgColor from '../assets/page2_bg_color.png'
 import bgLeft from '../assets/page2_bg_left_2x.png'
 import bgRight from '../assets/page2_bg_right_2x.png'
@@ -203,7 +203,7 @@ export default {
   height: 186px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   padding: 0 24px;
 }
 
@@ -255,7 +255,7 @@ export default {
 .footer-text {
     position: relative;
     top:40px;
-    right:0px;
+    left:-45px;
     width: 240px;
     height: auto;
 }
