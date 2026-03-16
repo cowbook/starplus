@@ -1,5 +1,5 @@
 <template>
-  <div class="page2" @click="goNext">
+  <div class="page4" @click="goNext">
 
 
 
@@ -22,26 +22,7 @@
         </div>
         
       </div>
-      <div class="segment seg2" />
-      <div class="segment seg3">
-        <img class="main" :src="main" alt="主要内容" />
-      </div>
 
-      <div class="segment seg4">
-
-        <img class="arrow" :src="arrow" alt="箭头" />
-        <img class="btn-start" :src="btnStart" alt="开始" />
-        
-      </div>
-      <div class="segment seg5" >
-
-
-                <img class="footer-text" :src="footerText" alt="底部文字" />
-
-
-      </div>
-      <div class="segment seg6">
-      </div>
     </div>
 
 
