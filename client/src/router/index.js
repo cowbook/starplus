@@ -3,6 +3,7 @@ import Home from '../views/Home.vue'
 import Page2 from '../views/Page2.vue'
 import Page3 from '../views/Page3.vue'
 import Page4 from '../views/Page4.vue'
+import Page5 from '../views/Page5.vue'
 
 const routes = [
   {
@@ -28,7 +29,7 @@ const routes = [
   {
     path: '/page5',
     name: 'Page5',
-    component: Page2
+    component: Page5
   },
   {
     path: '/page6',
