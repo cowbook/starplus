@@ -191,7 +191,7 @@ export default {
   name: 'Page2',
   data() {
     return {
-      apiBase: import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:3000/api`,
+      apiBase: import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname.indexOf('ai.')>=0?window.location.hostname:(window.location.hostname+":3000")}/api`,
       comptext,
       currentPage: 6,
       questionIndex: 0,
