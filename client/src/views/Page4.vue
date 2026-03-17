@@ -22,6 +22,9 @@
 
     <main class="content">
 
+      <div class="tip">
+        点击选择您所在的写字楼
+      </div>
     
 
       <div class="segment">
@@ -77,18 +80,14 @@
       </div>
       
     </main>
-
-    <footer class="segment">
+    <!--    <footer class="segment">
       <img class="footer-text" :src="footerText" alt="底部文字" />
     </footer>
+    
+    -->
 
 
 
-    <!--
-  
-
-
-        -->
   </div>
 </template>
 
@@ -196,6 +195,15 @@ export default {
 </script>
 
 <style scoped>
+.tip{
+  font-size:13px;
+  font-family: 'Heiti', Microsoft YaHei, Helvetica, Arial, sans-serif;
+  font-style: italic;
+  margin:10px 0 0 15px;
+  font-weight: 800;
+  color:#666;
+  text-align: left;
+}
 
 .page4 {
 

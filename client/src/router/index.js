@@ -4,6 +4,7 @@ import Page2 from '../views/Page2.vue'
 import Page3 from '../views/Page3.vue'
 import Page4 from '../views/Page4.vue'
 import Page5 from '../views/Page5.vue'
+import Page6 from '../views/Page6.vue'
 
 const routes = [
   {
@@ -34,17 +35,17 @@ const routes = [
   {
     path: '/page6',
     name: 'Page6',
-    component: Page2
+    component: Page6
   },
   {
     path: '/page7',
-    name: 'Page8',
-    component: Page2
+    name: 'Page7',
+    component: Page6
   },
   {
     path: '/page8',
     name: 'Page8',
-    component: Page2
+    component: Page6
   }
 ]
 

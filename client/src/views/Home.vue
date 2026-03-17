@@ -2,25 +2,34 @@
   <div class="page-bg" @click="goNext">
   <div class="page">
     <header class="hero">
-      <div class="hero-top">
+
+      <div class="hero-top bg-line">
         <img class="logo" :src="logo" alt="STARPLUS Logo" />
         <img class="year" :src="year" alt="2025" />
       </div>
-      <div style="height:332px;">
-        <img class="title" :src="mainText" alt="客户满意率调查" />
-        <img class="download" :src="downIcon" alt="下载" />
 
+      <div style="height:290px;" class="bg-line">
+        <img class="title" :src="mainText" alt="客户满意率调查" />
+
+        <div class="icon-group">
+
+          <img class="download" :src="downIcon" alt="下载" />
+          <img class="clickicon" :src="clickicon" alt="Card Background" />
+
+        </div>
+        
       </div>
     </header>
 
-    <main class="content">
+    <main class="content bg-line">
 
       <img class="card" :src="card" alt="Card Background" />
 
 
       <img class="fold" :src="fold" alt="Card Background" />
 
-        
+
+      
 
       
     </main>
@@ -40,11 +49,13 @@ import downIcon from '../assets/page1_down.png'
 import card from '../assets/page1_card.png'
 import fold from '../assets/page1_fold.png'
 import starplus from '../assets/page1_starplus.png'
+import clickicon from '../assets/click.svg'
 
 export default {
   name: 'Home',
   data() {
     return {
+      clickicon,
       logo,
       year,
       mainText,
@@ -91,13 +102,46 @@ export default {
 
 <style scoped>
 
+.icon-group{
+  margin-top:-30px;
+  padding:0 50px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.clickicon{
+
+  width: 120px;
+  margin: 20px 0;
+  display: block;
+
+}
+
+.download {
+  display: block;
+  width: 50px;
+  
+}
+
 .page-bg {
   height: 100%;
   width: 100%;
+  /*
   background-position: left top;
   background-repeat: repeat-x;
   background-image: url('../assets/page1_bg_line.png');
+  */
   cursor: pointer;
+}
+
+.bg-line {
+
+  background-position: bottom center;
+  background-repeat: no-repeat;
+  background-image: url('../assets/page2_bg_horizontal_line.png');
+  background-size: 100% 1px;
 }
 
 
@@ -147,28 +191,22 @@ export default {
   display: block;
 }
 
-.download {
 
-  width: 50px;
-  margin-top: -10px;
-  display: block;
-  margin-left: auto;
-  margin-right: 30px;
-}
 
 .content {
   width: 100%;
-  height:472px;
   margin:0;
+  height: 300px;
 }
 
 .card {
+
   display: block;
   z-index: 100;
   position: relative;
   left:29px;
   top:-20px;
-  width: 260px;
+  width: 210px;
 
   filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, 0.36));
   
@@ -177,8 +215,7 @@ export default {
 .fold{
   position: relative;
   top: -110px;
-  max-width: 340px;
-  width: 70%;
+  width: 240px;
 }
 
 .card-bg {
@@ -236,47 +273,15 @@ export default {
   min-height: 90px;
 }
 
-.submit-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 12px 20px;
-  background: linear-gradient(135deg, #2e7df6 0%, #2cc6d7 100%);
-  border: none;
-  border-radius: 999px;
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 12px 24px rgba(46, 125, 246, 0.2);
-  transition: transform 0.16s ease, box-shadow 0.16s ease;
-}
 
-.submit-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 16px 30px rgba(46, 125, 246, 0.28);
-}
 
-.submit-btn .icon {
-  width: 18px;
-  height: 18px;
-}
+
 
 .footer-decor {
   display: block;
   width: 150px;
-  margin:-28px auto 0 30px;
+  margin:-28px auto 0 60px;
 }
 
-@media (max-width: 640px) {
- 
 
-  .form-panel {
-    top: 12px;
-    left: 12px;
-    right: 12px;
-    bottom: 12px;
-    padding: 18px;
-  }
-}
 </style>

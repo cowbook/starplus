@@ -30,8 +30,11 @@
       <div class="segment seg4">
 
         <img class="arrow" :src="arrow" alt="箭头" />
-        <img class="btn-start" :src="btnStart" alt="开始" />
-        
+
+        <div class="blue-btn" @click="goNext">
+          点击确认开始
+        </div>
+
       </div>
       <div class="segment seg5" >
 
@@ -88,7 +91,7 @@ export default {
   },
   methods: {
     goNext() {
-      this.$router.push('/page3')
+      this.$router.push('/page4')
     },
     goBack() {
       this.$router.push('/')
@@ -98,6 +101,28 @@ export default {
 </script>
 
 <style scoped>
+
+
+.blue-btn {
+  margin: -35px 60px 0 auto;
+  width: 140px;
+  height: 55px;
+  line-height: 55px;
+  background-image: url('../assets/blue_btn.png');
+  background-repeat: no-repeat;
+  background-size: 140px auto;
+  color: white;
+
+  font-size: 14px;
+  font-family: 'MyHeiTi', yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
+  text-align: center;
+  cursor: pointer;
+
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+
+  letter-spacing: 2px;
+}
+
 
 .page2 {
 

@@ -1,109 +1,102 @@
 <template>
-  <div class="page5">
+  <div class="page6">
 
-
-
-
-    <div class="content">
-
-
-      <div class="segment">
+      <header class="segment">
 
         <div class="row">
 
             <img class="logo" :src="logo" alt="STARPLUS" />
-            <img class="text-top" :src="textTop" alt="顶部文字" />
 
-            <div style="display:flex; flex-basis:64px;">
+            <div>
 
-                <img class="btn-star" :src="btnStar" alt="星" />
-                <img class="btn-star" :src="btnDown" alt="下" />
+              <img class="text-top" :src="textTop" alt="顶部文字" />
+              <div class="top-group">
+                  <img class="btn-star" :src="btnStar" alt="星" />
+                  <img class="btn-star" :src="btnDown" alt="下" />
 
 
+              </div>
             </div>
+
+        </div>
+        
+      </header>
+
+      <div class="block">
+
+        <div class="row">
+          <div>
+            <h2 class="h2">
+              {{page.title}}
+            </h2>
+            <div class="title-desc">
+              {{page.title_en}}  
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="block" v-for="(item, index) in page.items" :key="index">
+
+        <div class="h3">
+          <div class="sy">
+            {{ item.title }}
+          </div>
+          <div class="item-desc">
+            {{ item.title_en }}
+          </div>
+        </div>
+        
+        <div class="row">
+
+            <div class="option-group">
+                <label v-for="(o,ind) in item.options" :key="o" class="option-item" :for="'opt-' + index + '-' + ind">
+                  <input type="radio" alt="选项1" :name="'opt-' + index"  :id="'opt-' + index + '-' + ind " />
+                  <span></span>
+                  {{o}}
+                </label>
+            </div>
+
 
         </div>
         
       </div>
 
+      <div class="segment" v-if="currentPage==6">
+
+        <div class="row" style="justify-content:space-between; margin: 60px 110px 40px auto;">
+
+          <img :src="comptext" alt="comptext"  style="width:140px;position: relative;top:160px;"/>
+
+          <img :src="notebook_icon" alt="笔记本图标" style="width:140px;"/>
+
+        </div>
+
+      </div>
+
+
+
+
       <div class="segment">
         <div class="row">
-          <div>
-            <img class="h1" :src="h1" alt="客户满意率调查" />
-            <div class="title-desc">
-              Tenants'Satisfaction Survey
-            </div>
 
+          <div class="blue-btn" @click="p6_goPrev">
+                上一页
           </div>
-          <img class="h1-icon" :src="h1_icon" alt="客户满意率调查" />
+
+          <div class="blue-btn" @click="p6_goNext">
+                下一页
+          </div>
         </div>
       </div>
 
-      <div class="segment">
-
-        <div class="form">
-
-          <div class="h2">请填写您的基本信息</div>
-
-
-          <div class="input-group">
-            <div class="blue-border"></div>
-            <label class="input-label">姓名/Name</label>
-            <input type="text" class="input-field" placeholder="姓名" />
-          </div>
-
-            <div class="input-group">
-            <div class="blue-border"></div>
-            <label class="input-label">手机/Mobile</label>
-            <input type="text" class="input-field" placeholder="手机号码" />
-          </div>
-
-            <div class="input-group">
-            <div class="blue-border"></div>
-            <label class="input-label">单元/Unit</label>
-            <input type="text" class="input-field" placeholder="单元" />
-          </div>
-
-            <div class="input-group">
-            <div class="blue-border"></div>
-            <label class="input-label">公司名称/Company</label>
-            <input type="text" class="input-field" placeholder="公司名称" />
-          </div>
-
-            <div class="input-group">
-            <div class="blue-border"></div>
-            <label class="input-label">调查日/Date</label>
-            <input type="text" class="input-field" placeholder="调查日期" v-model="form.subdate" />
-          </div>
 
 
 
-        </div>
+      
 
 
-        <div class="footer-zh">
-          你的建议对我们很重要<br>
-                    对于您们的反馈我们将十分感谢
-
-        </div>
-
-     
-
-        <div class="footer-en">
-          Your opinion matters to us<br>
-          We will be grateful for your feedback
-        </div>
-
-
-
-      </div>
-
-
-      <div class="blue-btn" @click="goNext">
-        开启问卷调查
-      </div>
-
-    </div>
 
     <!-- Modal -->
     <div v-if="showModal" class="modal-overlay" @click="showModal = false">
@@ -131,7 +124,7 @@ import textTop from '../assets/page_title.svg'
 import btnStar from '../assets/page2_btnstar_topright.png'
 import btnDown from '../assets/page2_btndown_topright.png'
 
-import h1 from '../assets/page5_h1.svg'
+import comptext from '../assets/text.svg'
 
 
 import h1_icon from '../assets/page5_title_icon.png'
@@ -142,15 +135,18 @@ import bgColor from '../assets/page2_bg_color.png'
 import bgLeft from '../assets/page2_bg_left_2x.png'
 import bgRight from '../assets/page2_bg_right_2x.png'
 import bgLine from '../assets/page2_bg_horizontal_line.png'
+import notebook_icon from '../assets/page6_note.png'
 
 export default {
   name: 'Page2',
   data() {
     return {
+      comptext,
+      currentPage: 6,
+      notebook_icon,
       logo,
       textTop,
       h1_icon,
-      h1,
       btnStar,
       btnDown,
       bgColor,
@@ -161,38 +157,60 @@ export default {
         subdate: '2026-10-26'
       },
       showModal: false,
-      message: ''
+      message: '',
+      page:{
+        title: '33',
+        title_en: '',
+        items:[]
+      },
+      pages:{
+        'page6':{
+          title:'1.物业管理中心',
+          title_en:'Property Management Center',
+          items:[
+            {
+              title:'1.1 整体满意度',
+              title_en:'Overall Satisfaction',
+              options:[
+                '非常满意',
+                '满意',
+                '一般',
+                '不满意',
+                '非常不满意'
+              ]
+            }
+          ]
+        }
+      }
     }
+  },
+  mounted() {
+    // 模拟获取数据：使用当前路由路径（去掉前导 `/`）作为 key
+    const currentPage = this.$route.path.replace(/^\//, '');
+    this.page = this.pages[currentPage];
+    this.currentPage = parseInt(currentPage.substring(4));
+
   },
   methods: {
 
-    goNext() {
-
-      this.$router.push('/page6')
-
-
-      const name = document.querySelector('input[placeholder="姓名"]')?.value;
-      const mobile = document.querySelector('input[placeholder="手机号码"]')?.value;
-      const unit = document.querySelector('input[placeholder="单元"]')?.value;
-      const company = document.querySelector('input[placeholder="公司名称"]')?.value;
-
-      if (false && !name || !mobile || !unit || !company) {
-        this.showModal = true;
-        this.message = '请填写所有信息';
-        return;
-      }
-
+    p6_goNext() {
       
-      this.showModal = true;
-      this.message = '最后一页';
+      this.currentPage += 1;
+      this.$router.push('/page'  + this.currentPage)
+      
+   
 
 
 
+      //this.$router.push('/page6')
 
     },
 
-    goBack() {
-      this.$router.push('/')
+    p6_goPrev() {
+
+      this.currentPage -= 1;
+      this.$router.push('/page'  + this.currentPage)
+
     }
   }
 }
@@ -200,10 +218,117 @@ export default {
 
 <style scoped>
 
+
+
 @font-face {
   font-family: 'MyHeiTi';
   src: url('../assets/myheiti.ttf') format('truetype');
 }
+
+.option-group {
+
+  display: flex;
+  flex-wrap:  nowrap;
+  margin-top: 10px;
+  gap:10px;
+}
+
+
+.option-item {
+  font-size:11px;
+  display: flex;
+  align-items: center;
+
+}
+  
+ .option-item input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  /* 自定义未选中状态 */
+  .option-item span {
+    
+    width: 14px;
+    height: 14px;
+    border: 2px solid #00b7eb; /* 未选中边框颜色 */
+    border-radius: 50%;
+    pointer-events: none; /* 允许点击穿透 */
+    margin-right: 3px;
+  }
+  
+  /* 自定义选中状态 */
+.option-item input[type="radio"]:checked + span {
+    border-color: #00b7eb; /* 选中边框颜色 */
+    background: #00b7eb; /* 选中填充色 */
+    color: white;
+    font-family:yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
+    font-size:18px;
+  }
+  
+  /* 添加内部圆点（选中时） */
+ .option-item input[type="radio"]:checked + span::before {
+    content: "√";
+    position: relative;
+    top:-3px;
+    left:-2px;
+  }
+
+
+
+
+.option-item label {
+  
+  cursor: pointer;
+  font-family: yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
+}
+
+
+
+
+.item-desc{
+  font-size: 11px;
+  color: #FFF;
+  font-weight: 100;
+  white-space: nowrap;
+}
+
+.sy{
+    transform: scaleY(1.2); /* Y轴拉伸3倍，数值越大越细长 */
+
+}
+.h3{
+  
+  background-color: #533278;
+  color: #fff;
+  font-family: yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  letter-spacing: 2px;
+  width:70%;
+  padding: 12px 12px;
+  border-radius: 0 25px 25px 0;
+  filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, 0.36));
+
+}
+
+.h2{
+  font-size:38px;
+  text-shadow: #00b7eb 0px 0px 8px;
+  font-family: 'MyHeiTi', yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
+
+}
+
+.input-group{
+  display:flex; flex-basis:64px;
+}
+.btn-star {
+
+    width: 32px;
+    height: 32px;
+}
+
 
 .blue-btn {
   margin: 30px auto;
@@ -225,7 +350,7 @@ export default {
 
   letter-spacing: 2px;
 }
-.page5 {
+.page6 {
 
   min-height: 100vh;
 
@@ -273,7 +398,7 @@ export default {
 }
 
 .row{
-
+    margin:0 auto;
     max-width:500px;
     width:100%;
     box-sizing: border-box;
@@ -282,6 +407,8 @@ export default {
     align-items: flex-start;
     justify-content: space-between;
 }
+
+
 
 .form {
 
@@ -358,8 +485,16 @@ export default {
   background-repeat: no-repeat;
   background-image: url('../assets/page2_bg_horizontal_line.png');
   background-size: 100% 1px;
-  padding-bottom: 20px;
+  padding-bottom: 10px;
 }
+
+
+.block {
+  
+  width: 100%;
+  padding-bottom: 10px;
+}
+
 
 
 
@@ -373,11 +508,7 @@ export default {
   height: auto;
 }
 
-.btn-star {
-    margin-top:30px;
-    width: 32px;
-    height: auto;
-}
+
 
 
 
@@ -388,11 +519,11 @@ export default {
 }
 
 .title-desc{
-  padding: 0 6px;
+  text-align: left;
+  padding: 0 16px;
   font-size: 14px;
   font-weight: 500;
   color: #2c3e50;
-  margin-top: 8px;
   font-family: 'MyHeiTi', yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
 }
 
@@ -405,12 +536,33 @@ export default {
 
 
 
-.h2{
+.h2 {
+  margin-bottom: 0px;
   font-family: 'MyHeiTi', yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
-  font-size: 12px;
-  color: #2c3e50;
+  font-size: 30px;
+  font-weight: 100;
+  color: #fff;
   text-align: left;
-  padding:15px 10px;
+  padding: 15px 10px;
+  text-stroke:7px transparent;
+  -webkit-text-stroke:7px transparent;
+  background-color:#00b7eb;
+  -webkit-background-clip: text;
+  background-clip: text;
+
+
+  /* 外部描边/光晕（模拟描边）
+  text-shadow:
+    -1 -1 0px #00b7eb,
+    0 0 10px #00b7eb,
+    0 0 10px #00b7eb,
+    0 0 2px #00b7eb,
+    0 0 3px #00b7eb,
+    0 0 4px #00b7eb,
+    0 0 2px #00b7eb,
+    0 0 3px #00b7eb,
+    0 0 6px #00b7eb,
+    0 0 6px rgba(0, 183, 235, 0.4);*/
 }
 
 

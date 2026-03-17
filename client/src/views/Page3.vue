@@ -23,63 +23,10 @@
     <main class="content">
 
     
-
-      <div class="segment">
-
-        <div class="row">
-
-          <div class="p-row">
-
-              <img class="item" :src="p1" alt="STARPLUS" @click="blockTap('星扬西岸中心')" />
-              <img class="item" :src="p2" alt="STARPLUS"@click="blockTap('星瀚广场')" />
-
-          </div>
-
-        </div>
-      </div>
-      <div class="segment">
-
-        <div class="row">
-
-          <div class="p-row">
-
-              <img class="item" :src="p3" alt="STARPLUS" @click="blockTap('星寰国际商业中心')" />
-              <img class="item" :src="p4" alt="STARPLUS" @click="blockTap('北京环球金融中心')" />
-
-          </div>
-        </div>
-      </div>
-      <div class="segment">
-
-        <div class="row">
-
-          <div class="p-row">
-
-              <img class="item" :src="p5" alt="STARPLUS" @click="blockTap('688广场')" />
-              <img class="item" :src="p6" alt="STARPLUS" @click="blockTap('恒基名人商业大厦')" />
-
-          </div>
-        </div>
-    </div>
-      <div class="segment">
-
-        <div class="row">
-
-          <div class="p-row">
-
-              <img class="item" :src="p7" alt="STARPLUS" @click="blockTap('恒汇国际大厦')" />
-              <img class="item" :src="p8" alt="STARPLUS" @click="blockTap('环智国际大厦')" />
-
-          </div>
-        </div>
-
-
-      </div>
-      
     </main>
 
     <footer class="segment">
-      <img class="footer-text" :src="footerText" alt="底部文字" />
+      <img class="footer-text" :src="footerText" alt="底部文字" @click="goNext()" />
     </footer>
 
 
@@ -147,7 +94,7 @@ export default {
   },
   methods: {
     goNext() {
-      this.$router.push('/page3')
+      this.$router.push('/page4')
     },
     goBack() {
       this.$router.push('/')
