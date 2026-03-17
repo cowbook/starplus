@@ -71,7 +71,7 @@
                   <input type="radio" v-model="item.value" :value="o" alt="选项1" :name="'opt-' + index"  :id="'opt-' + index + '-' + ind " />
                   <span></span>
                    {{o}}
-                  <div style="position:absolute;margin-top:32px;font-size:10px;margin-left:20px">
+                  <div class="opt-en">
                     {{item.options_en[ind]}}
                   </div>
                  
@@ -84,7 +84,7 @@
                   <input type="radio" v-model="item.value" :value="o" alt="选项1" :name="'opt-' + index"  :id="'opt-' + index + '-' + ind " />
                   <span></span>
                    {{o}}
-                  <div style="position:absolute;margin-top:32px;font-size:10px;margin-left:20px">
+                  <div class="opt-en-n">
                     {{item.options_en[ind]}}
                   </div>
                  
@@ -190,8 +190,18 @@ import notebook_icon from '../assets/page6_note.png'
 export default {
   name: 'Page2',
   data() {
+    const hostname = window.location.hostname;
+    const isLocalHost =
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      /^\d+\.\d+\.\d+\.\d+$/.test(hostname);
+
     return {
-      apiBase: import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname.indexOf('ai.')>=0?window.location.hostname:(window.location.hostname+":3000")}/api`,
+      apiBase:
+        import.meta.env.VITE_API_URL ||
+        (isLocalHost
+          ? `${window.location.protocol}//${hostname}:3000/api`
+          : '/api'),
       comptext,
       currentPage: 6,
       questionIndex: 0,
@@ -1327,11 +1337,12 @@ export default {
           formStore.$reset();
           localStorage.removeItem('form-temp-data');
         } else {
-          alert('提交失败，请稍后重试')
+          const errText = await response.text();
+          alert(`提交失败(${response.status})：${errText || '请稍后重试'}`)
         }
       } catch (error) {
         console.error('Error:', error)
-        alert('提交失败，请检查网络或稍后再试')
+        alert(`提交失败，请检查网络或稍后再试\n${error?.message || ''}`)
       }
     }
 
@@ -1361,19 +1372,30 @@ export default {
   font-family: yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
 }
 
-.option-group {
+.opt-en{
+  position:absolute;margin-top:32px;font-size:10px;margin-left:20px
 
+}
+
+.opt-en-n{
+  position:absolute;margin-top:32px;font-size:9px;margin-left:12px
+}
+
+.option-group {
+  min-width:320px;
   display: flex;
   flex-wrap:  nowrap;
   margin-top: 10px;
-  gap:10px;
+  margin-left:3px;
 }
 
 
 .option-item {
-  font-size:11px;
+  min-width:48px;
+  font-size:10px;
   display: flex;
   align-items: center;
+  white-space: nowrap;
 
 }
   
@@ -1387,12 +1409,12 @@ export default {
   /* 自定义未选中状态 */
   .option-item span {
     
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
     border: 2px solid #00b7eb; /* 未选中边框颜色 */
     border-radius: 50%;
     pointer-events: none; /* 允许点击穿透 */
-    margin-right: 3px;
+    margin-right: 1px;
   }
   
   /* 自定义选中状态 */
@@ -1401,7 +1423,7 @@ export default {
     background: #00b7eb; /* 选中填充色 */
     color: white;
     font-family:yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
-    font-size:18px;
+    font-size:16px;
   }
   
   /* 添加内部圆点（选中时） */
