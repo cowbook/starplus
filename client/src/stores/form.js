@@ -4,8 +4,7 @@ import { defineStore } from 'pinia';
 
 export const useFormStore = defineStore('form', {
   state: () => ({
-    step1Data: {},
-    step2Data: {},
+    FormData: {}
   }),
   persist: {
     enabled: true,
@@ -13,7 +12,7 @@ export const useFormStore = defineStore('form', {
       {
         key: 'form-temp-data',
         storage: localStorage, // 使用localStorage持久化
-        paths: ['step1Data', 'step2Data'],
+        paths: ['FormData'],
       },
     ],
   },

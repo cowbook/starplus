@@ -4,6 +4,7 @@
     <header class="segment seg1">
 
       <div class="row">
+
           <img class="logo" :src="logo" alt="STARPLUS" />
           <img class="text-top" :src="textTop" alt="顶部文字" />
 
@@ -23,7 +24,13 @@
     <main class="content">
 
       <div class="tip">
-        点击选择您所在的写字楼
+        <div @click="goBack()">
+          ⬅️  上一步
+        </div>
+
+        <div>
+          点击下方图片选择您所在的写字楼
+        </div>
       </div>
     
 
@@ -33,8 +40,12 @@
 
           <div class="p-row">
 
-              <img class="item" :src="p1" alt="STARPLUS" @click="blockTap('星扬西岸中心')" />
-              <img class="item" :src="p2" alt="STARPLUS"@click="blockTap('星瀚广场')" />
+              <div class="item" :class="{active: choice === '星扬西岸中心'}" @click="blockTap('星扬西岸中心')">
+                <img :src="p1" alt="STARPLUS" />
+              </div>
+              <div class="item" :class="{active: choice === '星瀚广场'}" @click="blockTap('星瀚广场')">
+                <img :src="p2" alt="STARPLUS" />
+              </div>
 
           </div>
 
@@ -46,8 +57,12 @@
 
           <div class="p-row">
 
-              <img class="item" :src="p3" alt="STARPLUS" @click="blockTap('星寰国际商业中心')" />
-              <img class="item" :src="p4" alt="STARPLUS" @click="blockTap('北京环球金融中心')" />
+              <div class="item" :class="{active: choice === '星寰国际商业中心'}" @click="blockTap('星寰国际商业中心')">
+                <img :src="p3" alt="STARPLUS" />
+              </div>
+              <div class="item" :class="{active: choice === '北京环球金融中心'}" @click="blockTap('北京环球金融中心')">
+                <img :src="p4" alt="STARPLUS" />
+              </div>
 
           </div>
         </div>
@@ -58,8 +73,12 @@
 
           <div class="p-row">
 
-              <img class="item" :src="p5" alt="STARPLUS" @click="blockTap('688广场')" />
-              <img class="item" :src="p6" alt="STARPLUS" @click="blockTap('恒基名人商业大厦')" />
+              <div class="item" :class="{active: choice === '688广场'}" @click="blockTap('688广场')">
+                <img :src="p5" alt="STARPLUS" />
+              </div>
+              <div class="item" :class="{active: choice === '恒基名人商业大厦'}" @click="blockTap('恒基名人商业大厦')">
+                <img :src="p6" alt="STARPLUS" />
+              </div>
 
           </div>
         </div>
@@ -70,8 +89,12 @@
 
           <div class="p-row">
 
-              <img class="item" :src="p7" alt="STARPLUS" @click="blockTap('恒汇国际大厦')" />
-              <img class="item" :src="p8" alt="STARPLUS" @click="blockTap('环智国际大厦')" />
+              <div class="item" :class="{active: choice === '恒汇国际大厦'}" @click="blockTap('恒汇国际大厦')">
+                <img :src="p7" alt="STARPLUS" />
+              </div>
+              <div class="item" :class="{active: choice === '环智国际大厦'}" @click="blockTap('环智国际大厦')">
+                <img :src="p8" alt="STARPLUS" />
+              </div>
 
           </div>
         </div>
@@ -80,6 +103,7 @@
       </div>
       
     </main>
+
     <!--    <footer class="segment">
       <img class="footer-text" :src="footerText" alt="底部文字" />
     </footer>
@@ -97,10 +121,8 @@
 // 组件中使用
 import { useFormStore } from '../stores/form';
 
-
 import logo from '../assets/page2_logo_top_left.png'
 import textTop from '../assets/page_title.svg'
-import main from '../assets/page2_main2.svg'
 import btnStart from '../assets/page2_btnstart.svg'
 import arrow from '../assets/page2_arrow.png'
 import btnStar from '../assets/page2_btnstar_topright.png'
@@ -127,11 +149,10 @@ export default {
   name: 'Page4',
   data() {
     return {
-      choice: "",
+      choice: "恒汇国际大厦",
       p1,p2,p3,p4,p4,p5,p6,p7,p8,
       logo,
       textTop,
-      main,
       btnStart,
       btnStar,
       btnDown,
@@ -144,50 +165,35 @@ export default {
       apiBase: import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:3000`
     }
   },
+  mounted() {
+
+    const formStore = useFormStore();
+
+    // 从 store 获取数据并设置到本地 choice
+    this.choice = formStore.formData?.blockName || '';
+  },
   methods: {
-    goNext() {
-      this.$router.push('/page3')
-    },
+    
     goBack() {
-      this.$router.push('/')
+      this.$router.push('/page2')
     },
-    async submitForm() {
-      const formStore = useFormStore();
-      try {
-        const response = await fetch(`${this.apiBase}/submit`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            name: '',
-            email: '',
-            feedback: formStore.step1Data.blockName
-          })
-        })
-        if (response.ok) {
-          alert('提交成功！')
-          formStore.$reset();
-          localStorage.removeItem('form-temp-data');
-        } else {
-          alert('提交失败，请稍后重试')
-        }
-      } catch (error) {
-        console.error('Error:', error)
-        alert('提交失败，请检查网络或稍后再试')
-      }
-    },
+    
     blockTap(name) {
-       // 阻止事件冒泡
+
        this.choice = name;
 
        const formStore = useFormStore();
-       formStore.step1Data = { blockName: name };
+       formStore.formData = { ...formStore.formData,  blockName: name };
 
-       console.log("选择了", name);
+       console.log("选择了", formStore.formData);
        //this.submitForm();
 
-       this.$router.push('/page5');
+       setTimeout(() => {
+
+          this.$router.push('/page5');
+
+       }, 700);
+
 
     }
   }
@@ -196,13 +202,35 @@ export default {
 
 <style scoped>
 .tip{
+  display: flex;
+  justify-content: space-between;;
   font-size:13px;
   font-family: 'Heiti', Microsoft YaHei, Helvetica, Arial, sans-serif;
-  font-style: italic;
   margin:10px 0 0 15px;
   font-weight: 800;
   color:#666;
   text-align: left;
+}
+
+
+
+.active img {
+  border: 8px solid #ffd70088;
+  box-sizing: border-box;
+  border-radius: 10px;
+}
+
+.active::after {
+  content: '√';
+  position: absolute;
+  opacity: 0.7;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 88px;
+  font-weight: bold;
+  font-family:  Helvetica, Arial, sans-serif;
 }
 
 .page4 {
@@ -224,7 +252,7 @@ export default {
     margin:0 auto;
     max-width:500px;
     width:100%;
-    padding:20px 0px 0px 0px;
+    padding:10px 0px 0px 0px;
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
@@ -234,8 +262,9 @@ export default {
 .p-row{
   width:100%;
   display:flex; 
-  justify-content: center;
-  padding-bottom: 20px;
+  justify-content:space-around;
+  padding: 0 0 10px 20px;
+  
 }
 
 .content {
@@ -262,21 +291,31 @@ export default {
     
 }
 
-.item{
-  margin:0 10px;
+.item {
+  position: relative;
+  display: inline-block;
+  width: calc(50% - 40px);
+  max-width: 450px;
+  cursor: pointer;
+}
+
+.item img {
   display: block;
-  width:calc(50% - 20px);
-  max-width:450px;
+  width: 100%;
+  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.16));
 }
 
 .logo {
+  position: relative;
     margin-left:30px;
-    width: 120px;
+    width: 160px;
     height: auto;
 }
 
 .text-top {
-  width: 90px;
+  position: relative;
+  top:-5px;
+  width: 120px;
   height: auto;
 }
 
@@ -295,14 +334,7 @@ export default {
   padding: 0 24px;
 }
 
-.main {
-  max-width:390px;
-  width:80%;
-  height: auto;
 
-    filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, 0.36));
-
-}
 
 .seg4 {
 
@@ -318,14 +350,7 @@ export default {
 }
 
 
-.arrow{
-    display: relative;
-    left: -120px;
-    top:-300px;
-    width: 124px;
 
-
-}
 
 
 .seg5 {

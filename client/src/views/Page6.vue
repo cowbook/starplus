@@ -39,9 +39,9 @@
 
       <div class="block" v-for="(item, index) in page.items" :key="index">
 
-        <div class="h3">
+        <div class="h3" :class="{ 'even': index  % 2 === 1,'color1': (index + questionIndex) % 3 === 1,'color2': (index + questionIndex) % 3 === 2 ,'color3': (index + questionIndex) % 3 === 0 }">
           <div class="sy">
-            {{ item.title }}
+            {{ item.title }}   <span style="font-size:10px">{{ item.small || '' }}</span>
           </div>
           <div class="item-desc">
             {{ item.title_en }}
@@ -50,11 +50,44 @@
         
         <div class="row">
 
-            <div class="option-group">
-                <label v-for="(o,ind) in item.options" :key="o" class="option-item" :for="'opt-' + index + '-' + ind">
-                  <input type="radio" alt="选项1" :name="'opt-' + index"  :id="'opt-' + index + '-' + ind " />
+            <textarea class="item-textarea" v-if="item.control==='textarea'" v-model="item.value" placeholder="请输入您的意见..."></textarea>
+
+
+            <div v-else-if="item.control==='multiple'" class="option-group" style="flex-wrap: wrap;">
+
+                <label style="margin-top:9px;width:100px;" v-for="(o,ind) in item.options" :key="'opt-' + index + '-' + ind "  class="option-item" :for="'opt-' + index + '-' + ind">
+                  <input type="checkbox" v-model="item.value" :value="o" alt="选项1" :id="'opt-' + index + '-' + ind " />
+                   {{o}}
+                  <div style="position:absolute;margin-top:32px;font-size:8px;margin-left:0px">
+                    {{item.options_en[ind]}}
+                  </div>
+                 
+                </label>
+            </div>
+
+            <div v-else-if="item.title.indexOf('8.1')>=0" class="option-group" style="flex-wrap: wrap;">
+
+                 <label style="width:120px;margin-top:10px" v-for="(o,ind) in item.options" :key="'opt-' + index + '-' + ind "  class="option-item" :for="'opt-' + index + '-' + ind">
+                  <input type="radio" v-model="item.value" :value="o" alt="选项1" :name="'opt-' + index"  :id="'opt-' + index + '-' + ind " />
                   <span></span>
-                  {{o}}
+                   {{o}}
+                  <div style="position:absolute;margin-top:32px;font-size:10px;margin-left:20px">
+                    {{item.options_en[ind]}}
+                  </div>
+                 
+                </label>
+            </div>
+
+            <div v-else class="option-group">
+
+                <label v-for="(o,ind) in item.options" :key="'opt-' + index + '-' + ind "  class="option-item" :for="'opt-' + index + '-' + ind">
+                  <input type="radio" v-model="item.value" :value="o" alt="选项1" :name="'opt-' + index"  :id="'opt-' + index + '-' + ind " />
+                  <span></span>
+                   {{o}}
+                  <div style="position:absolute;margin-top:32px;font-size:10px;margin-left:20px">
+                    {{item.options_en[ind]}}
+                  </div>
+                 
                 </label>
             </div>
 
@@ -77,15 +110,29 @@
 
 
 
-
-      <div class="segment">
+      <div class="segment" v-if = "currentPage == 25">
         <div class="row">
 
-          <div class="blue-btn" @click="p6_goPrev">
+          <div class="blue-btn" @click="p6_goNext(-1)">
                 上一页
           </div>
 
-          <div class="blue-btn" @click="p6_goNext">
+          <div class="blue-btn" @click="submitForm()">
+                提交页面
+          </div>
+
+        
+        </div>
+      </div>
+
+      <div class="segment" v-else>
+        <div class="row">
+
+          <div class="blue-btn" @click="p6_goNext(-1)">
+                上一页
+          </div>
+
+          <div class="blue-btn" @click="p6_goNext(1)">
                 下一页
           </div>
         </div>
@@ -118,6 +165,9 @@
 
 <script>
 
+import { useFormStore } from '../stores/form';
+
+
 import logo from '../assets/page2_logo_top_left.png'
 import textTop from '../assets/page_title.svg'
 
@@ -141,8 +191,10 @@ export default {
   name: 'Page2',
   data() {
     return {
+      apiBase: import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:3000/api`,
       comptext,
       currentPage: 6,
+      questionIndex: 0,
       notebook_icon,
       logo,
       textTop,
@@ -154,7 +206,7 @@ export default {
       bgRight,
       bgLine,
       form: {
-        subdate: '2026-10-26'
+
       },
       showModal: false,
       message: '',
@@ -172,30 +224,1078 @@ export default {
               title:'1.1 整体满意度',
               title_en:'Overall Satisfaction',
               options:[
-                '非常满意',
-                '满意',
-                '一般',
+                '非常不满意',
                 '不满意',
-                '非常不满意'
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
               ]
             }
           ]
-        }
-      }
+        },
+        'page7':{
+          title:'2.客户服务',
+          title_en:'Customer Service',
+          items:[
+            {
+              title:'2.1 客服/礼宾台员工仪容仪表',
+              title_en:'Grooming of Customer Service Staff',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },
+            {
+              title:'2.2 前台礼宾服务',
+              small:'(含访客登记、雨伞借用)',
+              value:'',
+              title_en:'Concierge Staff',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },
+            {
+              title:'2.3 晨间迎宾服务及指引',
+              small:'(如适用)',
+              value:'',
+              title_en:'Concierge Staff',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            }
+          ]
+        },
+        'page8':{
+          title:'2.客户服务',
+          title_en:'Customer Service',
+          items:[
+            {
+              title:'2.4 咨询和投诉的处理',
+              title_en:'Handling of Inquiries & Complaints',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },
+            {
+              title:'2.5 服务响应效率',
+              value:'',
+              title_en:'Service Response Efficiency',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },
+            {
+              title:'2.6 配合租户的活动需求响应',
+              value:'',
+              title_en:'Assistance to Tenants Event Requirements',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            }
+          ]
+        },
+        'page9':{
+          title:'2.客户服务',
+          title_en:'Customer Service',
+          items:[
+            {
+              title:'2.7 信息发布与通知工作',
+              title_en:'Information Release & Notification',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },
+            {
+              title:'2.8 请问您对客户服务有什么意见?',
+              control:'textarea',
+              value:'',
+              title_en:'Any suggestions for our customer service?'
+            }
+          ]
+        },
+        'page10':{
+          title:'3.设施保养及维修',
+          title_en:'Facility & Maintenance',
+          items:[
+            {
+              title:'3.1 维修人员仪容仪表',
+              title_en:'Grooming of Maintenance Staff',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },
+            {
+              title:'3.2 维修响应及收费合理性',
+              value:'',
+              title_en:'Timely Response & Reasonable Charges',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },
+            {
+              title:'3.3 中央空调舒适度',
+              value:'',
+              title_en:'Central Air Conditioning Comfort',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            }
+          ]
+        },
+        'page11':{
+          title:'3.设施保养及维修',
+          title_en:'Facility & Maintenance',
+          items:[
+            {
+              title:'3.4 电梯及扶手电梯',
+              title_en:'Elevators & Escalators',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },
+            {
+              title:'3.5 公区照明',
+              value:'',
+              title_en:'Public Lighting System',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },
+            {
+              title:'3.6 茶水音',
+              small:'(如适用)',
+              value:'',
+              title_en:'Pantry(if applicable)',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            }
+          ]
+        },
+        'page12':{
+          title:'3.设施保养及维修',
+          title_en:'Facility & Maintenance',
+          items:[
+            {
+              title:'3.7 装修管理',
+              small:'异味、噪音、粉尘、施工人员管理',
+              title_en:'Fitting-out Management',
+              small_en:'Odors,NoiseDust,Workers management',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },
+            {
+              title:'3.8 请问您对设施维护有什么其他意见?',
+              control:'textarea',
+              value:'',
+              title_en:'Any suggestions for our facilities & maintenance?'
+            }
+          ]
+        },
+        'page13':{
+          title:'4.公共区域清洁及绿化',
+          title_en:'Cleaning & Maintenance of Public Area & Landscaping',
+          items:[
+            {
+              title:'4.1 保洁人员仪容仪表',
+              title_en:'Grooming of Cleaning Staff',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },{
+              title:'4.2 保洁人员服务态度',
+              title_en:'Attitude of Cleaning Staff',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },{
+              title:'4.3 清洁频率',
+              title_en:'Frequency of Cleaning',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },{
+              title:'4.3 清洁频率',
+              title_en:'Frequency of Cleaning',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            }
+          ]
+        },'page14':{
+          title:'4.公共区域清洁及绿化',
+          title_en:'Cleaning & Maintenance of Public Area & Landscaping',
+          items:[
+            {
+              title:'4.4 大堂及外墙清洁状况',
+              title_en:'Main Lobby & Exteror Wall',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },{
+              title:'4.5 公共走廊及楼梯清洁状况',
+              title_en:'Public Corridors & Stairs',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },{
+              title:'4.6 电梯及扶手电梯清洁状况',
+              title_en:'Lifs & Escalators',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            }
+          ]
+        },'page15':{
+          title:'4.公共区域清洁及绿化',
+          title_en:'Cleaning & Maintenance of Public Area & Landscaping',
+          items:[
+            {
+              title:'4.7 卫生间清洁状况',
+              title_en:'Cleanliness of Washroom',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },{
+              title:'4.8 卫生音易耗品补给及时性',
+              title_en:'Timely Replenishment of Washroom Supplies',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },{
+              title:'4.9 外围清洁状况',
+              title_en:'Cleanliness of External Area',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            }
+          ]
+        },'page16':{
+          title:'4.公共区域清洁及绿化',
+          title_en:'Cleaning & Maintenance of Public Area & Landscaping',
+          items:[
+            {
+              title:'4.10 公区绿植养护',
+              title_en:'Landscaping',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },{
+              title:'4.11 请问您对公共区域清洁及绿化有什么其他意见?',
+              title_en:'Any other suggestions regarding Cleaning & Maintenance of Public Area & Landscaping?',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            }
+          ]
+        },'page17':{
+          title:'5.保安服务及消防安全',
+          title_en:'Security Service and Fire Safety',
+          items:[
+            {
+              title:'5.1 保安人员仪容仪表',
+              title_en:'Grooming of Security Staff',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },{
+              title:'5.2 保安人员服务态度',
+              title_en:'Attitude of Security Staff',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },{
+              title:'5.3 突发事件紧急处理',
+              title_en:'Emergency Response',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            }
+          ]
+        },'page18':{
+          title:'5.保安服务及消防安全',
+          title_en:'Security Service and Fire Safety',
+          items:[
+            {
+              title:'5.4 室内抽烟管理',
+              title_en:'Smoking Management',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },{
+              title:'5.5 消防/火灾预防',
+              title_en:'Fire Safety',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },{
+              title:'5.6 交通指引及安全管控',
+              title_en:'Traffic Guidance & Safety Management',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            }
+          ]
+        },'page19':{
+          title:'5.保安服务及消防安全',
+          title_en:'Security Service and Fire Safety',
+          items:[
+            {
+              title:'5.7 请问您对保安及消防安全有什么其他意见?',
+              title_en:'Any other segguestion regarding Security & Fire Safety',
+              control:'textarea'
+              
+            }
+          ]
+        },'page20':{
+          title:'6.停车场管理',
+          title_en:'Car Parking',
+          items:[
+            {
+              title:'6.1 清洁',
+              title_en:'Cleanliness',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },{
+              title:'6.2 照明',
+              title_en:'Lighting',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },{
+              title:'6.3 指示牌清晰度',
+              title_en:'Parking Signage',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            }
+          ]
+        },'page21':{
+          title:'6.停车场管理',
+          title_en:'Car Parking',
+          items:[
+            {
+              title:'6.4 寻车便捷性',
+              title_en:'Easy to Find Parkings',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },{
+              title:'6.5 支付便捷性',
+              title_en:'Convenience of Paying',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },{
+              title:'6.6 请问您对停车场管理有什么其它意见?',
+              title_en:'Any other suggestions regarding Car Paking?',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            }
+          ]
+        },'page22':{
+          title:'7.其他物业服务',
+          title_en:'Other Service',
+          items:[
+            {
+              title:'7.1 节日装饰',
+              title_en:'Festive Decorations',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },{
+              title:'7.2 手机信号',
+              title_en:'Cell Phone Signal',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },{
+              title:'7.3 快递服务',
+              title_en:'Courier Service',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            }
+          ]
+        },
+        'page23':{
+          title:'7.其他物业服务',
+          title_en:'Other Service',
+          items:[
+            {
+              title:'7.4 外卖管理',
+              title_en:'Food Delivery Management',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            },{
+              title:'7.5 母婴室',
+              small:'(如适用)',
+              title_en:'Nursing Room (if applicable)',
+              value:'',
+              options:[
+                '非常不满意',
+                '不满意',
+                '一般',
+                '满意',
+                '非常满意',
+              ],
+              options_en:[
+                'Poor',
+                'Dissatisfied',
+                'Fair',
+                'Satisfied',
+                'Excellent'
+              ]
+            }
+          ]
+        },
+        
+        'page24':{
+          title:'8.活动参与',
+          title_en:'Activity Participation',
+          items:[
+            {
+              title:'8.1 您是否愿意参加我们举办的活动?',
+              title_en:'Would you like to take part in our activities?',
+              value:'',
+              options:[
+                '非常乐意',
+                '如果活动有趣的话',
+                '没什么时间',
+                '不感兴趣'
+              ],
+              options_en:[
+                'With great pleasure',
+                'If the activity is interesting',
+                'Not much time',
+                'Not interested'
+              ]
+            },{
+              title:'8.2 您喜欢哪种类型的活动?',
+              small:'可多选',
+              title_en:'What kind of activity do you prefer?(multiple-choice)',
+              control:'multiple',
+              value:[],
+              options:[
+                '运动游戏类',
+                '表演互动类',
+                '手工礼品类',
+                '公益类',
+                '艺术展览类',
+                '礼品换领活动'
+              ],
+              options_en:[
+                'Sports & Competitive games',
+                'Performance',
+                'Handicaft',
+                'Charitable Events',
+                'Art exhibitions',
+                'Gift redemptions'
+              ]
+            }
+          ]
+        },'page25':{
+          title:'9.ESG工作及节能减排',
+          title_en:'ESG & Emission Reduction',
+          submitpage:true,
+          items:[
+            {
+              title:'9.1 您对物业管理中心的ESG工作有哪些建议或意见?',
+              title_en:'What Suggestions do you have on the ESG of the property management center?',
+              value:'',
+              control:'textarea'
+
+            },{
+              title:'9.2 企业是否需要物管中心提供协助以实现ESG目标',
+              title_en:'Do companies require assistance from property management center to fulfill their ESG obligations?',
+              value:'',
+              control:'textarea'
+
+            },{
+              title:'9.3对于大厦/商场节能减排工作您有什么建议?',
+              title_en:'Do you have any secific suggestions for energy conservation and emission reduction measures in building or shopping malls?',
+              value:'',
+              control:'textarea'
+            }
+          ]
+        },
+      },
     }
   },
   mounted() {
-    // 模拟获取数据：使用当前路由路径（去掉前导 `/`）作为 key
-    const currentPage = this.$route.path.replace(/^\//, '');
-    this.page = this.pages[currentPage];
-    this.currentPage = parseInt(currentPage.substring(4));
-
+    this.updatePageFromRoute();
+  },
+  watch: {
+    '$route'(to) {
+      this.updatePageFromRoute();
+    }
   },
   methods: {
+    updatePageFromRoute() {
 
-    p6_goNext() {
+      const formStore = useFormStore();
+
+      const path = this.$route.path;
+      // 获取路由最后1个字符作为currentPage
+      this.currentPage = parseInt(path.replace(/^\//, '').replace('page', '')) || 6;
       
-      this.currentPage += 1;
+      // 更新页面数据
+      const currentPageKey = path.replace(/^\//, '');
+      this.page = this.pages[currentPageKey] || this.page;
+
+      this.form = { 
+        ...formStore.formData,
+        ...this.form
+      };
+
+      this.questionIndex = 0;
+
+      for(var page of Object.keys(this.pages)) {
+         var cp = parseInt(page.replace('page', ''))
+         if(cp < this.currentPage) {
+          this.questionIndex += this.pages[page].items.length; 
+         }
+      }
+
+
+      for(const item of this.page.items) {
+
+        if(this.form[item.title]) {
+          item.value = this.form[item.title];
+        }
+
+      }
+
+
+      
+
+      console.log('当前页面:', this.currentPage);
+    },
+
+    p6_goNext(n) {
+
+      const formStore = useFormStore();
+
+      // 确保 formStore.formData 存在
+      if (!formStore.formData) {
+        formStore.formData = {};
+      }
+
+      for(const item of this.page.items) {
+        formStore.formData[item.title] = item.value;
+      }
+
+      
+      this.currentPage += n;
+
+      console.log('Form Data:', formStore.formData);
+
       this.$router.push('/page'  + this.currentPage)
       
    
@@ -206,12 +1306,35 @@ export default {
 
     },
 
-    p6_goPrev() {
 
-      this.currentPage -= 1;
-      this.$router.push('/page'  + this.currentPage)
+    async submitForm() {
 
+      const formStore = useFormStore();
+
+      try {
+        const response = await fetch(`${this.apiBase}/submit`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            ...formStore.formData
+          })
+        })
+        if (response.ok) {
+          alert('提交成功！')
+          this.$router.push('/page26')
+          formStore.$reset();
+          localStorage.removeItem('form-temp-data');
+        } else {
+          alert('提交失败，请稍后重试')
+        }
+      } catch (error) {
+        console.error('Error:', error)
+        alert('提交失败，请检查网络或稍后再试')
+      }
     }
+
   }
 }
 </script>
@@ -223,6 +1346,19 @@ export default {
 @font-face {
   font-family: 'MyHeiTi';
   src: url('../assets/myheiti.ttf') format('truetype');
+}
+
+.item-textarea{
+  margin:20px 15px 0 15px;
+  width:100%;
+  height:80px;
+  padding:10px;
+  font-size:14px;
+  border-radius:8px;
+  border:1px solid #c8b08e55;
+  background-color:#f9f9f9;
+  resize:none;
+  font-family: yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
 }
 
 .option-group {
@@ -289,16 +1425,17 @@ export default {
 
 
 .item-desc{
-  font-size: 11px;
+  font-size: 9px;
   color: #FFF;
   font-weight: 100;
-  white-space: nowrap;
 }
 
 .sy{
     transform: scaleY(1.2); /* Y轴拉伸3倍，数值越大越细长 */
 
 }
+
+
 .h3{
   
   background-color: #533278;
@@ -313,12 +1450,35 @@ export default {
 
 }
 
+.h3.even{
+  margin-left:auto;
+  border-radius:25px 0 0 25px;
+}
+
+.h3.color1{
+  background-color: #533278;
+}
+
+.h3.color2{
+  background-color: #8a6d4a;
+}
+
+.h3.color3{
+  background-color: #00b7eb;
+}
+
+
 .h2{
   font-size:38px;
   text-shadow: #00b7eb 0px 0px 8px;
   font-family: 'MyHeiTi', yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
+  line-height: 130%;
+  margin:0;
 
 }
+
+
+
 
 .input-group{
   display:flex; flex-basis:64px;
@@ -350,6 +1510,8 @@ export default {
 
   letter-spacing: 2px;
 }
+
+
 .page6 {
 
   min-height: 100vh;
@@ -370,7 +1532,7 @@ export default {
 
 
   background-repeat:
-    no-repeat,            /* 左不重复 */
+    repeat-y,            /* 右不重复 */
     no-repeat,            /* 左不重复 */
     repeat-y;            /* 右不重复 */
 
@@ -492,19 +1654,19 @@ export default {
 .block {
   
   width: 100%;
-  padding-bottom: 10px;
+  padding-bottom: 40px;
 }
 
 
 
 
 .logo {
-    width: 140px;
+    width: 180px;
     height: auto;
 }
 
 .text-top {
-  width: 110px;
+  width: 120px;
   height: auto;
 }
 

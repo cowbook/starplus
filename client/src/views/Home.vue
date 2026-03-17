@@ -1,7 +1,7 @@
 <template>
   <div class="page-bg" @click="goNext">
-  <div class="page">
-    <header class="hero">
+  <div class="page appear-container">
+    <header class="hero appear-item" data-delay="0.1">
 
       <div class="hero-top bg-line">
         <img class="logo" :src="logo" alt="STARPLUS Logo" />
@@ -21,7 +21,7 @@
       </div>
     </header>
 
-    <main class="content bg-line">
+    <main class="content bg-line appear-item" data-delay="0.25">
 
       <img class="card" :src="card" alt="Card Background" />
 
@@ -35,7 +35,7 @@
     </main>
 
     <footer style="height: 169px;width:100%">
-      <img class="footer-decor" :src="starplus" alt="STARPLUS" />
+      <img class="footer-decor appear-item" data-delay="0.4" :src="starplus" alt="STARPLUS" />
     </footer>
   </div>
   </div>
@@ -70,6 +70,15 @@ export default {
       },
       apiBase: import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:3000`
     }
+  },
+
+  mounted() {
+    // 下一帧添加类，让 transition 生效
+    this.$nextTick(() => {
+      setTimeout(() => {
+        document.querySelector('.page')?.classList.add('appeared')
+      }, 1000)  // 轻微延迟更自然
+    })
   },
   methods: {
     goNext() {
@@ -281,6 +290,36 @@ export default {
   display: block;
   width: 150px;
   margin:-28px auto 0 60px;
+}
+
+
+
+/* ================== 页面首次加载时的出现动画 ================== */
+.appear-container {
+  /* 可选：整体容器轻微缩放进入 */
+  animation: containerEnter 1s ease-out forwards;
+}
+
+@keyframes containerEnter {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* 每个主要区块从不同方向滑入 + stagger */
+.appear-item {
+  opacity: 0;
+  transform: translateY(40px);           /* 默认从下往上 */
+  transition: all 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.appear-item[data-delay="0.1"]  { transition-delay: 0.1s; transform: translateX(-60px); }  /* logo/year 区从左 */
+.appear-item[data-delay="0.25"] { transition-delay: 0.25s; transform: translateY(80px); }  /* main 从下 */
+.appear-item[data-delay="0.4"]  { transition-delay: 0.4s; transform: translateX(60px); }   /* footer 从右 */
+
+/* 当挂载完成后添加 .appeared 类触发动画 */
+.page.appeared .appear-item {
+  opacity: 1;
+  transform: none;
 }
 
 

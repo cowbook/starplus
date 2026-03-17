@@ -44,36 +44,43 @@
         <div class="form">
 
           <div class="h2">请填写您的基本信息</div>
+          
+
+          <div class="input-group" style="background-color: #F0F0F0;">
+            <div class="blue-border" style="background-color:#F00"></div>
+            <label class="input-label">物业</label>
+            <input type="text" readonly="" class="input-field" name="blockName" :value="form.blockName"/>
+          </div>
 
 
           <div class="input-group">
             <div class="blue-border"></div>
             <label class="input-label">姓名/Name</label>
-            <input type="text" class="input-field" placeholder="姓名" />
+            <input type="text" class="input-field" name="name" placeholder="姓名" v-model="form.name"/>
           </div>
 
             <div class="input-group">
             <div class="blue-border"></div>
             <label class="input-label">手机/Mobile</label>
-            <input type="text" class="input-field" placeholder="手机号码" />
+            <input type="text" class="input-field" name="mobile" placeholder="手机号码" v-model="form.mobile" />
           </div>
 
             <div class="input-group">
             <div class="blue-border"></div>
             <label class="input-label">单元/Unit</label>
-            <input type="text" class="input-field" placeholder="单元" />
+            <input type="text" class="input-field" name="unit" placeholder="单元" v-model="form.unit" />
           </div>
 
             <div class="input-group">
             <div class="blue-border"></div>
             <label class="input-label">公司名称/Company</label>
-            <input type="text" class="input-field" placeholder="公司名称" />
+            <input type="text" class="input-field" name="company" placeholder="公司名称" v-model="form.company" />
           </div>
 
             <div class="input-group">
             <div class="blue-border"></div>
             <label class="input-label">调查日/Date</label>
-            <input type="text" class="input-field" placeholder="调查日期" v-model="form.subdate" />
+            <input type="text" class="input-field" name="subdate" placeholder="调查日期" v-model="form.subdate" />
           </div>
 
 
@@ -98,9 +105,16 @@
 
       </div>
 
+      <div class="row">
 
-      <div class="blue-btn" @click="goNext">
-        开启问卷调查
+        <div class="blue-btn" @click="goBack()">
+          上一页
+        </div>
+
+
+        <div class="blue-btn" @click="goNext">
+          开启问卷调查
+        </div>
       </div>
 
     </div>
@@ -125,6 +139,9 @@
 
 <script>
 
+import { useFormStore } from '../stores/form';
+
+
 import logo from '../assets/page2_logo_top_left.png'
 import textTop from '../assets/page_title.svg'
 
@@ -143,6 +160,9 @@ import bgLeft from '../assets/page2_bg_left_2x.png'
 import bgRight from '../assets/page2_bg_right_2x.png'
 import bgLine from '../assets/page2_bg_horizontal_line.png'
 
+
+
+
 export default {
   name: 'Page2',
   data() {
@@ -158,33 +178,49 @@ export default {
       bgRight,
       bgLine,
       form: {
+        blockName:'',
+        name: '',
+        mobile: '',
+        unit: '',
+        company: '',
         subdate: '2026-10-26'
       },
       showModal: false,
       message: ''
     }
   },
+  mounted() {
+
+    const formStore = useFormStore();
+
+    // 从 store 获取数据并设置到本地 form
+    this.form = { ...this.form, ...formStore.formData };
+  },
   methods: {
 
     goNext() {
 
-      this.$router.push('/page6')
+      const { name, mobile, unit, company, subdate } = this.form;
 
-
-      const name = document.querySelector('input[placeholder="姓名"]')?.value;
-      const mobile = document.querySelector('input[placeholder="手机号码"]')?.value;
-      const unit = document.querySelector('input[placeholder="单元"]')?.value;
-      const company = document.querySelector('input[placeholder="公司名称"]')?.value;
-
-      if (false && !name || !mobile || !unit || !company) {
+      if (!name || !mobile || !unit || !company || !subdate) {
         this.showModal = true;
         this.message = '请填写所有信息';
         return;
       }
 
+      const formStore = useFormStore();
+
+      //console.log('OLD:',formStore.formData);
+
+      formStore.formData = { 
+        ...formStore.formData,
+        ...this.form
+      };
+
+      console.log('Form Data:', formStore.formData);
       
-      this.showModal = true;
-      this.message = '最后一页';
+      this.$router.push('/page6')
+
 
 
 
@@ -192,7 +228,7 @@ export default {
     },
 
     goBack() {
-      this.$router.push('/')
+      this.$router.push('/page4')
     }
   }
 }
@@ -206,7 +242,7 @@ export default {
 }
 
 .blue-btn {
-  margin: 30px auto;
+  margin: 0px auto 30px auto;
   width: 140px;
   height: 55px;
   line-height: 55px;
@@ -410,7 +446,7 @@ export default {
   font-size: 12px;
   color: #2c3e50;
   text-align: left;
-  padding:15px 10px;
+  padding:0px 10px 15px 5px;
 }
 
 
@@ -420,7 +456,7 @@ export default {
   font-weight: 800;
   color: #533278;
   text-align: center;
-  margin-top: 20px;
+  margin-top: 0px;
 }
 
 .footer-en{
@@ -428,7 +464,7 @@ export default {
   font-size: 12px;
   color: #2c3e50;
   text-align: center;
-  margin-top: 8px;
+  margin-top: 0px;
 }
 
 .modal-overlay {

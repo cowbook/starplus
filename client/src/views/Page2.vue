@@ -203,7 +203,7 @@ export default {
 
 .logo {
     margin-left:30px;
-    width: 120px;
+    width: 160px;
     height: auto;
 }
 
