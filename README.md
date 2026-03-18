@@ -1,71 +1,168 @@
 # Form 2603 - Customer Survey Application
 
-A full-stack application with Vue 3 frontend and Node.js backend for collecting customer survey responses.
+Vue 3 + Node.js survey system.
+Frontend collects multi-page survey data and backend stores submissions in MongoDB.
 
 ## Project Structure
 
-- `client/` - Vue 3 frontend application
-- `server/` - Node.js Express backend API
+- `client/`: Vue 3 frontend
+- `server/`: Express API backend
+- `docker-compose.yml`: local MongoDB runtime
 
-## Features
+## Tech Stack
 
-- Customer survey form with name, email, and feedback fields
-- Form submission saves data to a text file on the server
-- CORS enabled for frontend-backend communication
+- Node.js >= 22
+- Vue 3 + Vue Router + Pinia
+- Express
+- MongoDB (local container by Docker)
 
-## Setup
+## Local MongoDB (Docker)
 
-1. Install dependencies for both client and server:
-   ```bash
-   cd client && npm install
-   cd ../server && npm install
-   ```
+1. Start Docker Desktop (or ensure Docker daemon is running).
+2. Start local MongoDB:
 
-2. Start the backend server:
-   ```bash
-   cd server && npm start
-   ```
-   Server runs on http://localhost:3000
+```bash
+cd /Volumes/T4/2026/job/starplus
+docker compose up -d mongodb
+```
 
-3. Start the frontend development server:
-   ```bash
-   cd client && npm run dev
-   ```
-   Client runs on http://localhost:5173
+3. Verify MongoDB container:
 
-## Usage
+```bash
+docker compose ps
+```
 
-1. Open http://localhost:5173 in your browser
-2. Fill out the survey form
-3. Click Submit to save the response
-4. Responses are saved to `server/submissions.txt`
+4. Stop MongoDB when needed:
 
-## API
+```bash
+docker compose stop mongodb
+```
 
-### POST /submit
+5. Remove MongoDB container (data volume is preserved unless removed explicitly):
 
-Submits survey data.
+```bash
+docker compose down
+```
 
-**Request Body:**
+## Backend Environment
+
+The backend reads MongoDB config from `server/.env`.
+
+Example:
+
+```env
+MONGODB_URI=mongodb://127.0.0.1:27017
+MONGODB_DB_NAME=starplus
+ADMIN_KEY=change-this-admin-key
+```
+
+Template file:
+
+- `server/.env.example`
+
+## Install and Run
+
+1. Install dependencies:
+
+```bash
+cd /Volumes/T4/2026/job/starplus/client && npm install
+cd /Volumes/T4/2026/job/starplus/server && npm install
+```
+
+2. Start backend:
+
+```bash
+cd /Volumes/T4/2026/job/starplus/server
+npm start
+```
+
+Backend listens on `http://localhost:3000`.
+
+3. Start frontend:
+
+```bash
+cd /Volumes/T4/2026/job/starplus/client
+npm run dev
+```
+
+Frontend runs on `http://localhost:5173`.
+
+## API Endpoints
+
+All APIs are mounted under `/api`.
+
+### POST /api/submit
+
+Save one survey submission to MongoDB.
+
+Request body: any JSON object (form data).
+
+Stored document shape:
+
 ```json
 {
-  "name": "string",
-  "email": "string",
-  "feedback": "string"
+   "...form fields": "...",
+   "createdAt": "2026-03-18T12:34:56.789Z",
+   "ip": "client ip"
 }
 ```
 
-**Response:**
-- 200: "Submission saved"
-- 500: "Error saving submission"
+Response example:
 
-## Requirements
+```json
+{
+   "message": "Submission saved",
+   "id": "mongodb_object_id"
+}
+```
 
-- Node.js >= 22
-- npm
+### GET /api/submissions
+
+Read submission history (latest first).
+
+This endpoint is admin-only.
+Send request header:
+
+```text
+x-admin-key: your-admin-key
+```
+
+### POST /api/webhook
+
+Pull latest code from repository.
+
+### GET /api/download
+
+Deprecated endpoint, returns HTTP 410.
+
+## Reverse Proxy Notes
+
+Backend enables `trust proxy` and reads IP in this order:
+
+1. `x-forwarded-for` (first IP)
+2. `x-real-ip`
+3. Express socket IP fallback
+
+For Nginx, ensure forwarding headers are set:
+
+```nginx
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+proxy_set_header X-Real-IP $remote_addr;
+```
+
+## Admin Page
+
+Open the admin page at:
+
+```text
+/admin
+```
+
+The page asks for the admin key defined in `server/.env`.
+After a valid login, it reads submission data from `/api/submissions`.
 
 ## Troubleshooting
 
-- Ensure both server and client are running
-- Check that ports 3000 and 5173 are available
-- Verify CORS settings if requests are blocked
+- If `docker compose up` fails with Docker daemon error, start Docker Desktop first.
+- If backend fails to connect MongoDB, verify `MONGODB_URI` in `server/.env`.
+- If port 3000 is in use, stop the old process before `npm start`.

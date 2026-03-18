@@ -6,6 +6,7 @@ import Page4 from '../views/Page4.vue'
 import Page5 from '../views/Page5.vue'
 import Page6 from '../views/Page6.vue'
 import Page26 from '../views/Page26.vue'
+import Admin from '../views/Admin.vue'
 
 const routes = [
   {
@@ -137,6 +138,11 @@ const routes = [
     path: '/page26',
     name: 'Page26',
     component: Page26
+  },
+  {
+    path: '/admin',
+    name: 'Admin',
+    component: Admin
   }
 ]
 
