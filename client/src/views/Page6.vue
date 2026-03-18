@@ -1,7 +1,7 @@
 <template>
-  <div class="page6">
+    <div v-if="assetsReady" class="page6 appear-container">
 
-      <header class="segment">
+      <header class="segment appear-item" data-delay="0.1">
 
         <div class="row">
 
@@ -21,6 +21,9 @@
         </div>
         
       </header>
+
+      <transition :name="innerTransitionName" mode="out-in">
+        <div :key="$route.path" class="page6-inner-view appear-item" data-delay="0.2">
 
       <div class="block">
 
@@ -138,6 +141,9 @@
         </div>
       </div>
 
+        </div>
+      </transition>
+
 
 
 
@@ -160,6 +166,10 @@
 
 
         -->
+  </div>
+
+  <div v-else class="page6 page6-loading">
+    <div class="loading-text">页面资源加载中...</div>
   </div>
 </template>
 
@@ -202,6 +212,8 @@ export default {
         (isLocalHost
           ? `${window.location.protocol}//${hostname}:3000/api`
           : '/api'),
+      assetsReady: false,
+      innerTransitionName: 'inner-slide-left',
       comptext,
       currentPage: 6,
       questionIndex: 0,
@@ -1238,15 +1250,59 @@ export default {
       },
     }
   },
-  mounted() {
+  async mounted() {
+    await this.preloadPageImages();
+    this.assetsReady = true;
+
+    this.$nextTick(() => {
+      setTimeout(() => {
+        document.querySelector('.page6')?.classList.add('appeared');
+      }, 200);
+    });
+
     this.updatePageFromRoute();
   },
   watch: {
-    '$route'(to) {
+    '$route'(to, from) {
+      const toPage = this.parseRoutePageNumber(to.path);
+      const fromPage = this.parseRoutePageNumber(from?.path || '');
+      this.innerTransitionName = toPage < fromPage ? 'inner-slide-right' : 'inner-slide-left';
       this.updatePageFromRoute();
     }
   },
   methods: {
+    preloadPageImages() {
+      const imageUrls = [
+        this.logo,
+        this.textTop,
+        this.btnStar,
+        this.btnDown,
+        this.comptext,
+        this.h1_icon,
+        this.bgColor,
+        this.bgLeft,
+        this.bgRight,
+        this.bgLine,
+        this.notebook_icon
+      ];
+
+      return Promise.all(
+        imageUrls.map((url) =>
+          new Promise((resolve) => {
+            const img = new Image();
+            img.onload = resolve;
+            img.onerror = resolve;
+            img.src = url;
+          })
+        )
+      );
+    },
+
+    parseRoutePageNumber(path) {
+      const match = path.match(/^\/page(\d+)$/);
+      return match ? Number(match[1]) : 0;
+    },
+
     updatePageFromRoute() {
 
       const formStore = useFormStore();
@@ -1276,7 +1332,15 @@ export default {
 
       for(const item of this.page.items) {
 
-        if(this.form[item.title]) {
+        // 先为不同控件补默认值，避免 v-model 绑定到 undefined
+        if (item.control === 'multiple') {
+          item.value = Array.isArray(item.value) ? item.value : [];
+        } else {
+          item.value = typeof item.value === 'string' ? item.value : '';
+        }
+
+        // 不能用 truthy 判断，否则空字符串会被误判为“没有值”
+        if (Object.prototype.hasOwnProperty.call(this.form, item.title)) {
           item.value = this.form[item.title];
         }
 
@@ -1579,6 +1643,51 @@ export default {
 
 
 
+}
+
+.page6-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-text {
+  color: #1b8fbe;
+  font-size: 14px;
+  font-family: 'MyHeiTi', yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
+  letter-spacing: 1px;
+}
+
+.page6-inner-view {
+  width: 100%;
+}
+
+.inner-slide-left-enter-active,
+.inner-slide-left-leave-active,
+.inner-slide-right-enter-active,
+.inner-slide-right-leave-active {
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.45s ease;
+}
+
+.inner-slide-left-enter-from {
+  transform: translateX(24px);
+  opacity: 0;
+}
+
+.inner-slide-left-leave-to {
+  transform: translateX(-24px);
+  opacity: 0;
+}
+
+.inner-slide-right-enter-from {
+  transform: translateX(-24px);
+  opacity: 0;
+}
+
+.inner-slide-right-leave-to {
+  transform: translateX(24px);
+  opacity: 0;
 }
 
 .row{

@@ -294,33 +294,5 @@ export default {
 
 
 
-/* ================== 页面首次加载时的出现动画 ================== */
-.appear-container {
-  /* 可选：整体容器轻微缩放进入 */
-  animation: containerEnter 1s ease-out forwards;
-}
-
-@keyframes containerEnter {
-  from { opacity: 0; transform: scale(0.96); }
-  to   { opacity: 1; transform: scale(1); }
-}
-
-/* 每个主要区块从不同方向滑入 + stagger */
-.appear-item {
-  opacity: 0;
-  transform: translateY(40px);           /* 默认从下往上 */
-  transition: all 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.appear-item[data-delay="0.1"]  { transition-delay: 0.1s; transform: translateX(-60px); }  /* logo/year 区从左 */
-.appear-item[data-delay="0.25"] { transition-delay: 0.25s; transform: translateY(80px); }  /* main 从下 */
-.appear-item[data-delay="0.4"]  { transition-delay: 0.4s; transform: translateX(60px); }   /* footer 从右 */
-
-/* 当挂载完成后添加 .appeared 类触发动画 */
-.page.appeared .appear-item {
-  opacity: 1;
-  transform: none;
-}
-
 
 </style>

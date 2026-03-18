@@ -1,7 +1,7 @@
 <template>
-  <div class="page26">
+  <div class="page26 appear-container">
 
-    <header class="segment seg1">
+    <header class="segment seg1 appear-item" data-delay="0.1">
 
       <div class="row">
           <img class="logo" :src="logo" alt="STARPLUS" />
@@ -14,7 +14,7 @@
     </header>
 
 
-    <main class="segment" style="padding-top:40px">
+    <main class="segment appear-item" style="padding-top:40px" data-delay="0.2">
 
       <div>
         如有更多意见与建议,欢迎联系我们:
@@ -67,7 +67,7 @@
 <br>
     </main>
 
-    <footer class="segment" style="padding-top:20px">
+    <footer class="segment appear-item" style="padding-top:20px" data-delay="0.35">
       
         <div style="text-align: center;">
 
@@ -144,6 +144,13 @@ export default {
       bgLine,
       apiBase: import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:3000/api`
     }
+  },
+  mounted() {
+    this.$nextTick(() => {
+      setTimeout(() => {
+        document.querySelector('.page26')?.classList.add('appeared');
+      }, 200);
+    });
   },
   methods: {
     reset(){

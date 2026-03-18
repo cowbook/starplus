@@ -1,11 +1,12 @@
 <template>
-  <div class="page2" @click="goNext">
+  <div class="page2">
 
 
 
 
     <div class="content">
-      <div class="segment seg1">
+
+      <div class="segment seg1 appear-item" data-delay="0.1">
 
         <div class="row">
             <img class="logo" :src="logo" alt="STARPLUS" />
@@ -22,21 +23,35 @@
         </div>
         
       </div>
-      <div class="segment seg2" />
-      <div class="segment seg3">
+
+      <div class="segment seg2"></div>
+
+      <div class="segment seg3 appear-item" data-delay="0.25">
         <img class="main" :src="main" alt="主要内容" />
       </div>
 
-      <div class="segment seg4">
+      <div class="segment seg4 appear-item" data-delay="0.1">
+
+        
 
         <img class="arrow" :src="arrow" alt="箭头" />
 
-        <div class="blue-btn" @click="goNext">
-          点击确认开始
+        <div style="display:flex">
+
+          <div class="blue-btn" @click.stop="goBack()" style="z-index:100;position:relative;left:27px;">
+            上一页
+          </div>
+
+          <div class="blue-btn" @click="goNext">
+            点击确认开始
+          </div>
+          
         </div>
 
+        
+
       </div>
-      <div class="segment seg5" >
+      <div class="segment seg5 appear-item" data-delay="0.4" >
 
 
                 <img class="footer-text" :src="footerText" alt="底部文字" />
@@ -89,9 +104,17 @@ export default {
       bgLine
     }
   },
+  mounted() {
+    // 下一帧添加类，让 transition 生效
+    this.$nextTick(() => {
+      setTimeout(() => {
+        document.querySelector('.page2')?.classList.add('appeared')
+      }, 1000)  // 轻微延迟更自然
+    })
+  },
   methods: {
     goNext() {
-      this.$router.push('/page4')
+      this.$router.push('/page3')
     },
     goBack() {
       this.$router.push('/')

@@ -1,14 +1,14 @@
 <template>
-  <div class="page4">
+  <div v-if="assetsReady" class="page4 appear-container">
 
-    <header class="segment seg1">
+    <header class="segment seg1 appear-item" data-delay="0.1">
 
       <div class="row">
 
           <img class="logo" :src="logo" alt="STARPLUS" />
           <img class="text-top" :src="textTop" alt="顶部文字" />
 
-          <div style="display: flex; gap: 10px;">
+          <div style="display: flex; gap: 3px;margin-right:15px;">
 
               <img class="btn-star" :src="btnStar" alt="星" />
               <img class="btn-star" :src="btnDown" alt="下" />
@@ -23,18 +23,18 @@
 
     <main class="content">
 
-      <div class="tip">
+      <div class="tip appear-item" data-delay="0.2">
         <div @click="goBack()">
-          ⬅️  上一步
+          ⬅ 上一步
         </div>
 
         <div>
-          点击下方图片选择您所在的写字楼
+          ▼点击图片选择您所在物业▼
         </div>
       </div>
     
 
-      <div class="segment">
+      <div class="segment appear-item" data-delay="0.25">
 
         <div class="row">
 
@@ -51,7 +51,7 @@
 
         </div>
       </div>
-      <div class="segment">
+      <div class="segment appear-item" data-delay="0.3">
 
         <div class="row">
 
@@ -67,7 +67,7 @@
           </div>
         </div>
       </div>
-      <div class="segment">
+      <div class="segment appear-item" data-delay="0.35">
 
         <div class="row">
 
@@ -83,7 +83,7 @@
           </div>
         </div>
     </div>
-      <div class="segment">
+      <div class="segment appear-item" data-delay="0.4">
 
         <div class="row">
 
@@ -112,6 +112,10 @@
 
 
 
+  </div>
+
+  <div v-else class="page4 page4-loading">
+    <div class="loading-text">页面资源加载中...</div>
   </div>
 </template>
 
@@ -149,6 +153,7 @@ export default {
   name: 'Page4',
   data() {
     return {
+      assetsReady: false,
       choice: "恒汇国际大厦",
       p1,p2,p3,p4,p4,p5,p6,p7,p8,
       logo,
@@ -165,7 +170,15 @@ export default {
       apiBase: import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:3000`
     }
   },
-  mounted() {
+  async mounted() {
+    await this.preloadPageImages();
+    this.assetsReady = true;
+
+    this.$nextTick(() => {
+      setTimeout(() => {
+        document.querySelector('.page4')?.classList.add('appeared');
+      }, 200);
+    });
 
     const formStore = useFormStore();
 
@@ -173,9 +186,41 @@ export default {
     this.choice = formStore.formData?.blockName || '';
   },
   methods: {
+    preloadPageImages() {
+      const imageUrls = [
+        this.logo,
+        this.textTop,
+        this.btnStar,
+        this.btnDown,
+        this.footerText,
+        this.bgColor,
+        this.bgLeft,
+        this.bgRight,
+        this.bgLine,
+        this.p1,
+        this.p2,
+        this.p3,
+        this.p4,
+        this.p5,
+        this.p6,
+        this.p7,
+        this.p8
+      ];
+
+      return Promise.all(
+        imageUrls.map((url) =>
+          new Promise((resolve) => {
+            const img = new Image();
+            img.onload = resolve;
+            img.onerror = resolve;
+            img.src = url;
+          })
+        )
+      );
+    },
     
     goBack() {
-      this.$router.push('/page2')
+      this.$router.push('/page3')
     },
     
     blockTap(name) {
@@ -201,16 +246,7 @@ export default {
 </script>
 
 <style scoped>
-.tip{
-  display: flex;
-  justify-content: space-between;;
-  font-size:13px;
-  font-family: 'Heiti', Microsoft YaHei, Helvetica, Arial, sans-serif;
-  margin:10px 0 0 15px;
-  font-weight: 800;
-  color:#666;
-  text-align: left;
-}
+
 
 
 
@@ -247,6 +283,60 @@ export default {
 
 }
 
+.page4-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-text {
+  color: #1b8fbe;
+  font-size: 14px;
+  font-family: 'MyHeiTi', yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
+  letter-spacing: 1px;
+}
+
+
+.tip{
+  box-sizing: border-box;
+  max-width:500px;
+  width:100%;
+  display: flex;
+  justify-content: space-between;;
+  font-size:13px;
+  font-family: 'Heiti', Microsoft YaHei, Helvetica, Arial, sans-serif;
+  padding:10px 40px 0 43px;
+  font-weight: 800;
+  color:#666;
+  text-align: left;
+  margin:0 auto;
+}
+
+
+.p-row{
+  width:100%;
+  display:flex; 
+  justify-content: space-between;
+  padding: 0 30px 10px 30px;
+  
+}
+
+.item {
+  position: relative;
+  display: inline-block;
+  width: 170px;
+  cursor: pointer;
+}
+
+.item img {
+  display: block;
+  width: 100%;
+  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.16));
+}
+
+
+
 .row{
 
     margin:0 auto;
@@ -259,13 +349,6 @@ export default {
 
 }
 
-.p-row{
-  width:100%;
-  display:flex; 
-  justify-content:space-around;
-  padding: 0 0 10px 20px;
-  
-}
 
 .content {
     margin: 0;
@@ -291,19 +374,7 @@ export default {
     
 }
 
-.item {
-  position: relative;
-  display: inline-block;
-  width: calc(50% - 40px);
-  max-width: 450px;
-  cursor: pointer;
-}
 
-.item img {
-  display: block;
-  width: 100%;
-  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.16));
-}
 
 .logo {
   position: relative;

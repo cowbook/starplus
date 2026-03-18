@@ -1,5 +1,5 @@
 <template>
-  <div class="page5">
+  <div v-if="assetsReady" class="page5 appear-container">
 
 
 
@@ -7,7 +7,7 @@
     <div class="content">
 
 
-      <div class="segment">
+      <div class="segment appear-item" data-delay="0.1">
 
         <div class="row">
 
@@ -26,7 +26,7 @@
         
       </div>
 
-      <div class="segment">
+      <div class="segment appear-item" style="padding-bottom:5px;" data-delay="0.2">
         <div class="row">
           <div>
             <img class="h1" :src="h1" alt="客户满意率调查" />
@@ -39,7 +39,7 @@
         </div>
       </div>
 
-      <div class="segment">
+      <div class="segment appear-item" data-delay="0.3">
 
         <div class="form">
 
@@ -105,7 +105,7 @@
 
       </div>
 
-      <div class="row">
+      <div class="row appear-item" data-delay="0.4">
 
         <div class="blue-btn" @click="goBack()">
           上一页
@@ -134,6 +134,10 @@
 
 
         -->
+  </div>
+
+  <div v-else class="page5 page5-loading">
+    <div class="loading-text">页面资源加载中...</div>
   </div>
 </template>
 
@@ -167,6 +171,7 @@ export default {
   name: 'Page2',
   data() {
     return {
+      assetsReady: false,
       logo,
       textTop,
       h1_icon,
@@ -189,7 +194,15 @@ export default {
       message: ''
     }
   },
-  mounted() {
+  async mounted() {
+    await this.preloadPageImages();
+    this.assetsReady = true;
+
+    this.$nextTick(() => {
+      setTimeout(() => {
+        document.querySelector('.page5')?.classList.add('appeared');
+      }, 200);
+    });
 
     const formStore = useFormStore();
 
@@ -197,6 +210,31 @@ export default {
     this.form = { ...this.form, ...formStore.formData };
   },
   methods: {
+    preloadPageImages() {
+      const imageUrls = [
+        this.logo,
+        this.textTop,
+        this.h1,
+        this.h1_icon,
+        this.btnStar,
+        this.btnDown,
+        this.bgColor,
+        this.bgLeft,
+        this.bgRight,
+        this.bgLine
+      ];
+
+      return Promise.all(
+        imageUrls.map((url) =>
+          new Promise((resolve) => {
+            const img = new Image();
+            img.onload = resolve;
+            img.onerror = resolve;
+            img.src = url;
+          })
+        )
+      );
+    },
 
     goNext() {
 
@@ -252,7 +290,6 @@ export default {
   color: white;
 
   font-size: 14px;
-  font-weight: bold;
   font-family: 'MyHeiTi', yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
   text-align: center;
   cursor: pointer;
@@ -306,6 +343,19 @@ export default {
 
 
 
+}
+
+.page5-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-text {
+  color: #1b8fbe;
+  font-size: 14px;
+  font-family: 'MyHeiTi', yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
+  letter-spacing: 1px;
 }
 
 .row{
