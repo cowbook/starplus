@@ -4,6 +4,7 @@ const cors = require('cors');
 const { exec } = require('child_process');
 require('dotenv').config();
 const { MongoClient } = require('mongodb');
+const XLSX = require('xlsx');
 
 const app = express();
 const apiRouter = express.Router();
@@ -58,6 +59,22 @@ function requireAdmin(req, res, next) {
   }
 
   next();
+}
+
+function normalizeExportValue(value) {
+  if (Array.isArray(value)) {
+    return value.join('，');
+  }
+
+  if (value && typeof value === 'object') {
+    return JSON.stringify(value);
+  }
+
+  if (value == null) {
+    return '';
+  }
+
+  return String(value);
 }
 
 apiRouter.post('/submit', async (req, res) => {
@@ -116,11 +133,68 @@ apiRouter.post('/webhook', (req, res) => {
 });
 
 
-apiRouter.get('/download', (req, res) => {
-  return res.status(410).json({
-    error: 'CSV download is no longer available',
-    message: 'Use GET /api/submissions to read records from MongoDB'
-  });
+apiRouter.get('/download', async (req, res) => {
+  try {
+    const rows = await submissionsCollection
+      .find({})
+      .sort({ _id: -1 })
+      .toArray();
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        error: 'No submissions',
+        message: 'No submission records found in MongoDB'
+      });
+    }
+
+    // Keep stable column order: id, createdAt, ip first, then other keys by first appearance.
+    const orderedHeaders = ['id', 'createdAt', 'ip'];
+    const headerSet = new Set(orderedHeaders);
+
+    for (const row of rows) {
+      for (const key of Object.keys(row)) {
+        if (key === '_id') {
+          continue;
+        }
+        if (!headerSet.has(key)) {
+          orderedHeaders.push(key);
+          headerSet.add(key);
+        }
+      }
+    }
+
+    const exportRows = rows.map((row) => {
+      const result = {
+        id: String(row._id),
+        createdAt: row.createdAt || '',
+        ip: row.ip || ''
+      };
+
+      for (const key of orderedHeaders) {
+        if (key === 'id' || key === 'createdAt' || key === 'ip') {
+          continue;
+        }
+        result[key] = normalizeExportValue(row[key]);
+      }
+
+      return result;
+    });
+
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(exportRows, { header: orderedHeaders });
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Submissions');
+
+    const fileBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+    const timestamp = new Date().toISOString().replace(/[-:]/g, '').slice(0, 15);
+    const filename = `submissions_${timestamp}.xlsx`;
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    return res.send(fileBuffer);
+  } catch (err) {
+    console.error('Error generating xlsx export:', err);
+    return res.status(500).json({ error: 'Failed to generate xlsx export' });
+  }
 });
 
 app.use('/api', apiRouter);

@@ -58,10 +58,10 @@
 
             <div v-else-if="item.control==='multiple'" class="option-group" style="flex-wrap: wrap;">
 
-                <label style="margin-top:9px;width:100px;" v-for="(o,ind) in item.options" :key="'opt-' + index + '-' + ind "  class="option-item" :for="'opt-' + index + '-' + ind">
+                <label v-for="(o,ind) in item.options" :key="'opt-' + index + '-' + ind "  class="option-item-multiple" :for="'opt-' + index + '-' + ind">
                   <input type="checkbox" v-model="item.value" :value="o" alt="选项1" :id="'opt-' + index + '-' + ind " />
                    {{o}}
-                  <div style="position:absolute;margin-top:32px;font-size:8px;margin-left:0px">
+                  <div style="position:absolute;margin-top:32px;font-size:8px;margin-left:0px;letter-spacing:-0.3px;">
                     {{item.options_en[ind]}}
                   </div>
                  
@@ -70,7 +70,7 @@
 
             <div v-else-if="item.title.indexOf('8.1')>=0" class="option-group" style="flex-wrap: wrap;">
 
-                 <label style="width:120px;margin-top:10px" v-for="(o,ind) in item.options" :key="'opt-' + index + '-' + ind "  class="option-item" :for="'opt-' + index + '-' + ind">
+                 <label style="margin-bottom:8px;width:120px;margin-top:10px" v-for="(o,ind) in item.options" :key="'opt-' + index + '-' + ind "  class="option-item" :for="'opt-' + index + '-' + ind">
                   <input type="radio" v-model="item.value" :value="o" alt="选项1" :name="'opt-' + index"  :id="'opt-' + index + '-' + ind " />
                   <span></span>
                    {{o}}
@@ -121,7 +121,11 @@
           </div>
 
           <div class="blue-btn" @click="submitForm()">
-                提交页面
+                提交
+          </div>
+
+          <div class="blue-btn" @click="PreviewForm()">
+                预览
           </div>
 
         
@@ -131,11 +135,11 @@
       <div class="segment" v-else>
         <div class="row">
 
-          <div class="blue-btn" @click="p6_goNext(-1)">
+          <div class="blue-btn-l" @click="p6_goNext(-1)">
                 上一页
           </div>
 
-          <div class="blue-btn" @click="p6_goNext(1)">
+          <div class="blue-btn-l" @click="p6_goNext(1)">
                 下一页
           </div>
         </div>
@@ -152,12 +156,27 @@
 
 
     <!-- Modal -->
-    <div v-if="showModal" class="modal-overlay" @click="showModal = false">
-      <div class="modal-content" @click.stop>
-        <p>{{ message }}</p>
-        <button class="modal-btn" @click="showModal = false">确定</button>
+    <teleport to="body">
+      <div v-if="showModal" class="modal-overlay" @click="closeModal">
+        <div class="modal-content" @click.stop>
+          <p>{{ message }}</p>
+          <button class="modal-btn" @click="onModalConfirm">确定</button>
+        </div>
       </div>
-    </div>
+
+      <div v-if="showPreviewModal" class="modal-overlay" @click="closePreviewModal">
+        <div class="modal-content preview-modal-content" @click.stop>
+          <h3 class="preview-title">问卷预览</h3>
+          <div class="preview-list">
+            <div v-for="(row, idx) in previewRows" :key="`${idx}-${row.question}`" class="preview-item">
+              <div class="preview-question">{{ row.question }}</div>
+              <div class="preview-answer">{{ row.answer }}</div>
+            </div>
+          </div>
+          <button class="modal-btn" @click="closePreviewModal">关闭</button>
+        </div>
+      </div>
+    </teleport>
 
 
 
@@ -231,7 +250,10 @@ export default {
 
       },
       showModal: false,
+      showPreviewModal: false,
       message: '',
+      modalAction: '',
+      previewRows: [],
       page:{
         title: '33',
         title_en: '',
@@ -1262,6 +1284,9 @@ export default {
 
     this.updatePageFromRoute();
   },
+  beforeUnmount() {
+    document.body.style.overflow = '';
+  },
   watch: {
     '$route'(to, from) {
       const toPage = this.parseRoutePageNumber(to.path);
@@ -1351,6 +1376,153 @@ export default {
 
       console.log('当前页面:', this.currentPage);
     },
+    //比如标题是 1.1 客服/礼宾台员工仪容仪表，应该排在 1.2 晨间迎宾服务及指引前面
+    compareQuestionKey(a, b) {
+      const matchA = String(a).match(/^(\d+(?:\.\d+)*)/);
+      const matchB = String(b).match(/^(\d+(?:\.\d+)*)/);
+
+      if (matchA && matchB) {
+        const partsA = matchA[1].split('.').map(Number);
+        const partsB = matchB[1].split('.').map(Number);
+        const maxLen = Math.max(partsA.length, partsB.length);
+
+        for (let i = 0; i < maxLen; i += 1) {
+          const valueA = partsA[i] ?? -1;
+          const valueB = partsB[i] ?? -1;
+          if (valueA !== valueB) {
+            return valueA - valueB;
+          }
+        }
+
+        return String(a).localeCompare(String(b), 'zh-Hans-CN');
+      }
+
+      if (matchA && !matchB) return -1;
+      if (!matchA && matchB) return 1;
+      return String(a).localeCompare(String(b), 'zh-Hans-CN');
+    },
+    normalizeFormattedValue(value) {
+      if (Array.isArray(value)) {
+        return value.join('，');
+      }
+
+      if (value == null) {
+        return '';
+      }
+
+      if (typeof value === 'string') {
+        return value.trim();
+      }
+
+      return String(value);
+    },
+    formatData(){
+      // 本函数在提交前对数据做统一格式化：
+      // 1. 合并当前页面还未点“下一页”的即时选择
+      // 2. 多选数组转为逗号分隔字符串
+      // 3. 英文字段名转为中文
+      // 4. 题目按数字编号排序（如 1.1, 1.2, 2.1）
+      const formStore = useFormStore();
+
+      const mergedData = {
+        ...(formStore.formData || {})
+      };
+
+      for (const item of this.page.items) {
+        mergedData[item.title] = item.value;
+      }
+
+      const fieldLabelMap = {
+        blockName: '物业',
+        name: '姓名',
+        mobile: '手机号',
+        unit: '单元',
+        company: '公司名称',
+        subdate: '调查日期'
+      };
+
+      const basicFieldOrder = ['blockName', 'name', 'mobile', 'unit', 'company', 'subdate'];
+
+      const entries = [];
+      const usedKeySet = new Set();
+
+      for (const key of basicFieldOrder) {
+        if (Object.prototype.hasOwnProperty.call(mergedData, key)) {
+          entries.push([fieldLabelMap[key] || key, this.normalizeFormattedValue(mergedData[key])]);
+          usedKeySet.add(key);
+        }
+      }
+
+      const questionKeys = Object.keys(mergedData)
+        .filter((key) => !usedKeySet.has(key))
+        .sort((a, b) => this.compareQuestionKey(a, b));
+
+      for (const key of questionKeys) {
+        entries.push([fieldLabelMap[key] || key, this.normalizeFormattedValue(mergedData[key])]);
+      }
+
+      return Object.fromEntries(entries);
+    },
+    PreviewForm() {
+      const formattedData = this.formatData();
+      const rows = Object.entries(formattedData).map(([question, answer]) => ({
+        question,
+        answer: this.formatPreviewAnswer(answer)
+      }));
+
+      this.previewRows = rows;
+      this.showPreviewModal = true;
+      this.updateBodyScrollLock();
+      console.log('预览表单数据:', formattedData);
+      
+    },
+
+    formatPreviewAnswer(value) {
+      if (Array.isArray(value)) {
+        return value.length > 0 ? value.join('、') : '未作答';
+      }
+
+      if (typeof value === 'string') {
+        const trimmed = value.trim();
+        return trimmed || '未作答';
+      }
+
+      if (value == null) {
+        return '未作答';
+      }
+
+      return String(value);
+    },
+    updateBodyScrollLock() {
+      if (this.showModal || this.showPreviewModal) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+      }
+    },
+    openModal(msg, action = '') {
+      this.message = msg;
+      this.modalAction = action;
+      this.showModal = true;
+      this.updateBodyScrollLock();
+    },
+    closeModal() {
+      this.showModal = false;
+      this.modalAction = '';
+      this.updateBodyScrollLock();
+    },
+    closePreviewModal() {
+      this.showPreviewModal = false;
+      this.updateBodyScrollLock();
+    },
+    onModalConfirm() {
+      const action = this.modalAction;
+      this.closeModal();
+
+      if (action === 'goPage26') {
+        this.$router.push('/page26');
+      }
+    },
 
     p6_goNext(n) {
 
@@ -1362,6 +1534,38 @@ export default {
       }
 
       for(const item of this.page.items) {
+
+          console.log('检查题目:', item.title, '值:', item.value);
+        
+          var required = true;
+
+          if(item.value && typeof(item.value) === 'string' && item.value.trim() !== '') {
+            required = false;
+          }
+
+          // 文本域不强制要求必须填写
+        if(required && item.control == 'textarea') {
+          required = false;
+        }
+        // 多选题必须至少选择一项
+        if(required && item.control == 'multiple' && item.value && Array.isArray(item.value) && item.value.length > 0) {
+            required = false;
+        }
+        
+
+        //可忽略的题目，如果题目描述里包含“如适用”则不强制要求必须填写
+        if(required && item.small && item.small.includes('如适用')) {
+          required = false;
+        }
+
+
+        console.log('题目:', item.title, '是否必填:', required);
+
+        if (required){
+          this.openModal('请先完成本页问卷再继续');
+          return;
+        }
+
         formStore.formData[item.title] = item.value;
       }
 
@@ -1383,7 +1587,7 @@ export default {
 
     async submitForm() {
 
-      const formStore = useFormStore();
+      const formattedData = this.formatData();
 
       try {
         const response = await fetch(`${this.apiBase}/submit`, {
@@ -1391,22 +1595,19 @@ export default {
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            ...formStore.formData
-          })
+          body: JSON.stringify(formattedData)
         })
         if (response.ok) {
-          alert('提交成功！')
-          this.$router.push('/page26')
-          formStore.$reset();
           localStorage.removeItem('form-temp-data');
+          this.openModal('提交成功！', 'goPage26');
+
         } else {
           const errText = await response.text();
-          alert(`提交失败(${response.status})：${errText || '请稍后重试'}`)
+          this.openModal(`提交失败(${response.status})：${errText || '请稍后重试'}`)
         }
       } catch (error) {
         console.error('Error:', error)
-        alert(`提交失败，请检查网络或稍后再试\n${error?.message || ''}`)
+        this.openModal(`提交失败，请检查网络或稍后再试\n${error?.message || ''}`)
       }
     }
 
@@ -1453,7 +1654,6 @@ export default {
   margin-left:3px;
 }
 
-
 .option-item {
   min-width:48px;
   font-size:10px;
@@ -1461,6 +1661,28 @@ export default {
   align-items: center;
   white-space: nowrap;
 
+}
+
+
+
+.option-item-multiple {
+  min-width:48px;
+  font-size:10px;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+   margin-bottom:10px;
+  margin-top:9px;
+  margin-left:0px;
+  width:100px;
+
+}
+
+
+
+.option-item:nth-child(2){
+  margin-left:4px;
+  margin-right:11px;
 }
   
  .option-item input[type="radio"] {
@@ -1577,17 +1799,17 @@ export default {
 
 
 .blue-btn {
+
   margin: 30px auto;
-  width: 140px;
-  height: 55px;
-  line-height: 55px;
+  width: 100px;
+  height: 35px;
+  line-height: 35px;
   background-image: url('../assets/blue_btn.png');
   background-repeat: no-repeat;
-  background-size: 140px auto;
+  background-size: 90px auto;
   color: white;
 
-  font-size: 14px;
-  font-weight: bold;
+  font-size: 12px;
   font-family: 'MyHeiTi', yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
   text-align: center;
   cursor: pointer;
@@ -1886,17 +2108,70 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  overflow-y: auto;
+  z-index: 9999;
 }
 
 .modal-content {
+ 
+
   background-color: white;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   max-width: 300px;
   text-align: center;
-  font-family: 'MyHeiTi', yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
+  font-family: yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
+}
+
+.preview-modal-content {
+  
+  width: 90vw;
+  height: 95vh;
+  max-width: none;
+  max-height: none;
+  margin: 0 auto;
+  border-radius: 0;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.preview-title {
+  margin: 0;
+  font-size: 18px;
+  color: #2c3e50;
+}
+
+.preview-list {
+  overflow-y: auto;
+  border: 1px solid #e3edf2;
+  border-radius: 8px;
+  padding: 8px;
+  background: #f9fcfe;
+}
+
+.preview-item {
+  padding: 10px;
+  border-bottom: 1px dashed #d7e3ea;
+}
+
+.preview-item:last-child {
+  border-bottom: none;
+}
+
+.preview-question {
+  font-size: 13px;
+  color: #2c3e50;
+  margin-bottom: 4px;
+}
+
+.preview-answer {
+  font-size: 13px;
+  color: #0077a3;
+  word-break: break-word;
 }
 
 .modal-btn {
@@ -1917,6 +2192,25 @@ export default {
 
 
 
+.blue-btn-l {
+  margin: 0px auto 30px auto;
+  width: 140px;
+  height: 55px;
+  line-height: 55px;
+  background-image: url('../assets/blue_btn.png');
+  background-repeat: no-repeat;
+  background-size: 140px auto;
+  color: white;
+
+  font-size: 14px;
+  font-family: 'MyHeiTi', yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
+  text-align: center;
+  cursor: pointer;
+
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+
+  letter-spacing: 2px;
+}
 
 
 

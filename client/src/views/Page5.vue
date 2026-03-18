@@ -61,7 +61,7 @@
 
             <div class="input-group">
             <div class="blue-border"></div>
-            <label class="input-label">手机/Mobile</label>
+            <label class="input-label">手机/Tel Number</label>
             <input type="text" class="input-field" name="mobile" placeholder="手机号码" v-model="form.mobile" />
           </div>
 
@@ -97,8 +97,8 @@
      
 
         <div class="footer-en">
-          Your opinion matters to us<br>
-          We will be grateful for your feedback
+          Your opinion is valuable to us and your<br>
+          feedbacks are highly appreciated
         </div>
 
 
@@ -112,8 +112,8 @@
         </div>
 
 
-        <div class="blue-btn" @click="goNext">
-          开启问卷调查
+        <div class="blue-btn" @click="goNext()">
+          提交
         </div>
       </div>
 
@@ -170,6 +170,9 @@ import bgLine from '../assets/page2_bg_horizontal_line.png'
 export default {
   name: 'Page2',
   data() {
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
     return {
       assetsReady: false,
       logo,
@@ -188,7 +191,7 @@ export default {
         mobile: '',
         unit: '',
         company: '',
-        subdate: '2026-10-26'
+        subdate: today
       },
       showModal: false,
       message: ''
@@ -237,14 +240,67 @@ export default {
     },
 
     goNext() {
-
+      
       const { name, mobile, unit, company, subdate } = this.form;
 
-      if (!name || !mobile || !unit || !company || !subdate) {
+      const trimmedName = (name || '').trim();
+      const trimmedMobile = (mobile || '').trim();
+      const trimmedUnit = (unit || '').trim();
+      const trimmedCompany = (company || '').trim();
+      const trimmedSubdate = (subdate || '').trim();
+
+      if (!trimmedName || !trimmedMobile || !trimmedUnit || !trimmedCompany || !trimmedSubdate) {
         this.showModal = true;
-        this.message = '请填写所有信息';
+        this.message = '请填写完整信息!';
         return;
       }
+
+      // 姓名至少 2 个字符
+      if (trimmedName.length < 2) {
+        this.showModal = true;
+        this.message = '姓名至少需要2个字符';
+        return;
+      }
+
+      // 手机号必须 11 位且符合大陆手机号格式
+      const mobilePattern = /^1[3-9]\d{9}$/;
+      if (!mobilePattern.test(trimmedMobile)) {
+        this.showModal = true;
+        this.message = '请输入有效的11位手机号';
+        return;
+      }
+
+      // 单元不能为空
+      if (!trimmedUnit) {
+        this.showModal = true;
+        this.message = '请输入单元信息';
+        return;
+      }
+
+      // 公司名称需要超过 3 个汉字（至少 4 个汉字）
+      const chineseCharCount = (trimmedCompany.match(/[\u4e00-\u9fa5]/g) || []).length;
+      if (chineseCharCount < 4) {
+        this.showModal = true;
+        this.message = '公司名称需超过3个汉字';
+        return;
+      }
+
+      // 调查日期格式校验 YYYY-MM-DD
+      const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+      if (!datePattern.test(trimmedSubdate) || Number.isNaN(new Date(trimmedSubdate).getTime())) {
+        this.showModal = true;
+        this.message = '调查日期格式应为YYYY-MM-DD';
+        return;
+      }
+
+      this.form = {
+        ...this.form,
+        name: trimmedName,
+        mobile: trimmedMobile,
+        unit: trimmedUnit,
+        company: trimmedCompany,
+        subdate: trimmedSubdate
+      };
 
       const formStore = useFormStore();
 
