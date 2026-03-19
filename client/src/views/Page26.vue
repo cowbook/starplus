@@ -14,13 +14,13 @@
     </header>
 
 
-    <main class="segment appear-item" style="padding-top:40px" data-delay="0.2">
+    <main class="segment appear-item" style="padding-top:40px;" data-delay="0.2">
 
-      <div>
+      <div style="color:#886e49;margin-left:-10px;">
         如有更多意见与建议,欢迎联系我们:
         <br>
-
-        Corpcomm@starplus-sh.com.cn
+     <span style="font-weight:900;margin-top:20px"> Corpcomm@starplus-sh.com.cn</span>
+       
 
                 <br>
         <br>
@@ -29,38 +29,54 @@
       </div>
 
       <div class="bar">
-        星扬西岸中心:021-6403 6018
+        <span class="bar-name">星扬西岸中心</span>
+        <span class="bar-sep">:</span>
+        <span class="bar-phone">021-6403 6018</span>
       </div>
 
       <div class="bar">
-        星 瀚 广 场:021-5496 2878
+        <span class="bar-name">星瀚广场</span>
+        <span class="bar-sep">:</span>
+        <span class="bar-phone">021-5496 2878</span>
       </div>
 
       <div class="bar">
-        星寰国际商业中心:020-8370 1773
+        <span class="bar-name">星寰国际商业中心</span>
+        <span class="bar-sep">:</span>
+        <span class="bar-phone">020-8370 1773</span>
       </div>
 
       <div class="bar">
-        北京环球金融中心:010-8587 8188
+        <span class="bar-name">北京环球金融中心</span>
+        <span class="bar-sep">:</span>
+        <span class="bar-phone">010-8587 8188</span>
       </div>
 
       <div class="bar">
-        6 8 8 广场:021-6273 7688
+        <span class="bar-name">&#65302;&#65302;&#65304;广场</span>
+        <span class="bar-sep">:</span>
+        <span class="bar-phone">021-6273 7688</span>
       </div>
 
       <div class="bar">
-        恒基名人商业大厦:021-3366 0818
+        <span class="bar-name">恒基名人商业大厦</span>
+        <span class="bar-sep">:</span>
+        <span class="bar-phone">021-3366 0818</span>
       </div>
 
       <div class="bar">
-        恒汇国际大厦:021-3253 2801
+        <span class="bar-name">恒汇国际大厦</span>
+        <span class="bar-sep">:</span>
+        <span class="bar-phone">021-3253 2801</span>
       </div>
 
       <div class="bar">
-        环智国际大厦:021-8016 7666
+        <span class="bar-name">环智国际大厦</span>
+        <span class="bar-sep">:</span>
+        <span class="bar-phone">021-8016 7666</span>
       </div>
 
-      <div style="color:goldenrod;font-size:18px;margin-top:20px;">
+      <div style="color:#886e49;font-size:14px;margin-top:20px;font-weight: bold;">
         感谢您的参与和支持<br>
         祝您工作顺利, 生活愉快
       </div>
@@ -69,11 +85,11 @@
 
     <footer class="segment appear-item" style="padding-top:20px" data-delay="0.35">
       
-        <div style="text-align: center;">
+        <div style="text-align: center; font-size: 12px;">
 
-          退出问卷请按左上角关闭按钮
+          退出问卷请按右上角关闭按钮
 
-          <div class="blue-btn" @click="reset()">
+          <div class="blue-btn" style="margin-top:0px" @click="reset()">
                 重新填写
           </div>
 
@@ -249,18 +265,56 @@ export default {
 
 }
 .bar{
+  display:grid;
+  grid-template-columns: 3fr auto 2fr;
+  align-items: center;
+
   background-color: #8a6d4a;
   border-radius: 0 20px 20px 0;
-  width:60%;
+  width:70%;
 
   color:#FFF;
 
-  padding:5px 0;
-  font-size:14px;
+  padding:3px 0;
+  font-size:13px;
   font-weight: 800;
   margin-bottom: 12px;
   margin-left:35px;
+  padding-left: 12px;
+  padding-right: 12px;
+  line-height: 1;
 
+}
+
+.bar-name {
+  padding-left:20px;
+  display: block;
+  text-align: justify;
+  text-align-last: justify;
+  text-justify: inter-ideograph;
+  line-height: 1;
+  position: relative;
+  top: 6px;
+}
+
+.bar-name::after {
+  content: '';
+  display: inline-block;
+  width: 100%;
+  height: 0;
+  line-height: 0;
+  overflow: hidden;
+}
+
+.bar-sep {
+  padding: 0 8px;
+  text-align: center;
+}
+
+.bar-phone {
+  text-align: left;
+  white-space: nowrap;
+  line-height: 1;
 }
 
 .bar:nth-child(even){

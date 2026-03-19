@@ -277,13 +277,14 @@ export default {
         return;
       }
 
-      // 公司名称需要超过 3 个汉字（至少 4 个汉字）
+      /*
+      // 公司名称需要超过 1个汉字（至少 4 个汉字）
       const chineseCharCount = (trimmedCompany.match(/[\u4e00-\u9fa5]/g) || []).length;
       if (chineseCharCount < 4) {
         this.showModal = true;
         this.message = '公司名称需超过3个汉字';
         return;
-      }
+      }*/
 
       // 调查日期格式校验 YYYY-MM-DD
       const datePattern = /^\d{4}-\d{2}-\d{2}$/;
