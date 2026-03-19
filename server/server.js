@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const { exec } = require('child_process');
+const { promisify } = require('util');
 require('dotenv').config();
 const { MongoClient } = require('mongodb');
 const XLSX = require('xlsx');
@@ -13,6 +14,7 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017';
 const DB_NAME = process.env.MONGODB_DB_NAME || 'starplus';
 const COLLECTION_NAME = 'submissions';
 const ADMIN_KEY = process.env.ADMIN_KEY || 'change-this-admin-key';
+const execAsync = promisify(exec);
 
 let submissionsCollection;
 
@@ -122,14 +124,79 @@ apiRouter.get('/submissions', requireAdmin, async (req, res) => {
 });
 
 apiRouter.post('/webhook', (req, res) => {
-  exec('git pull --force origin main', { cwd: path.join(__dirname, '..') }, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Git pull error: ${error}`);
-      return res.status(500).send('Pull failed');
+  const repoRoot = path.join(__dirname, '..');
+
+  const clipLog = (value = '') => {
+    const text = String(value || '').trim();
+    if (!text) {
+      return '';
     }
-    console.log(`Git pull output: ${stdout}`);
-    res.send('Pull successful');
-  });
+    const maxLen = 4000;
+    return text.length > maxLen ? `${text.slice(0, maxLen)}\n...<truncated>` : text;
+  };
+
+  const runWebhookPipeline = async () => {
+    const steps = [
+      { name: 'git pull', command: 'git pull --ff-only origin main' },
+      { name: 'client install', command: 'npm --prefix client install' },
+      { name: 'client build', command: 'npm --prefix client run build' }
+    ];
+
+    const result = [];
+
+    for (const step of steps) {
+      const startedAt = Date.now();
+
+      try {
+        const { stdout, stderr } = await execAsync(step.command, {
+          cwd: repoRoot,
+          timeout: 10 * 60 * 1000,
+          maxBuffer: 10 * 1024 * 1024
+        });
+
+        result.push({
+          step: step.name,
+          ok: true,
+          durationMs: Date.now() - startedAt,
+          stdout: clipLog(stdout),
+          stderr: clipLog(stderr)
+        });
+      } catch (error) {
+        const failure = {
+          step: step.name,
+          ok: false,
+          durationMs: Date.now() - startedAt,
+          stdout: clipLog(error.stdout),
+          stderr: clipLog(error.stderr),
+          message: error.message
+        };
+
+        result.push(failure);
+        throw { failure, result };
+      }
+    }
+
+    return result;
+  };
+
+  runWebhookPipeline()
+    .then((steps) => {
+      console.log('[webhook] pull/install/build completed');
+      return res.json({
+        message: 'Webhook succeeded: code pulled and client built',
+        steps
+      });
+    })
+    .catch((error) => {
+      const failure = error.failure || { step: 'unknown', message: 'Unknown webhook error' };
+      console.error('[webhook] pipeline failed:', failure);
+      return res.status(500).json({
+        error: 'Webhook pipeline failed',
+        failedStep: failure.step,
+        message: failure.message,
+        steps: error.result || []
+      });
+    });
 });
 
 
