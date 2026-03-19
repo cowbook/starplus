@@ -284,6 +284,9 @@ export default {
   padding-right: 12px;
   line-height: 1;
 
+  filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, 0.36));
+
+
 }
 
 .bar-name {
