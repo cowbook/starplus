@@ -87,7 +87,7 @@
       
         <div style="text-align: center; font-size: 12px;">
 
-          退出问卷请按右上角关闭按钮
+          退出问卷请按左上角✕按钮关闭
 
           <div class="blue-btn" style="margin-top:0px" @click="reset()">
                 重新填写
