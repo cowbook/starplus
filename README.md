@@ -1,3 +1,77 @@
+# Form 2603 - 客户调研应用
+
+一个前后端一体化应用：前端使用 Vue 3，后端使用 Node.js，用于收集客户调研反馈。
+
+## 项目结构
+
+- `client/` - Vue 3 前端应用
+- `server/` - Node.js Express 后端 API
+
+## 功能
+
+- 客户调研表单，包含姓名、邮箱和反馈字段
+- 表单提交后将数据保存到服务器上的文本文件
+- 已启用 CORS，支持前后端通信
+
+## 安装与启动
+
+1. 安装前端和后端依赖：
+   ```bash
+   cd client && npm install
+   cd ../server && npm install
+   ```
+
+2. 启动后端服务：
+   ```bash
+   cd server && npm start
+   ```
+   服务运行在 http://localhost:3000
+
+3. 启动前端开发服务：
+   ```bash
+   cd client && npm run dev
+   ```
+   前端运行在 http://localhost:5173
+
+## 使用方式
+
+1. 在浏览器打开 http://localhost:5173
+2. 填写调研表单
+3. 点击 Submit 提交并保存反馈
+4. 提交结果保存至 `server/submissions.txt`
+
+## API
+
+### POST /submit
+
+提交调研数据。
+
+**请求体：**
+```json
+{
+  "name": "string",
+  "email": "string",
+  "feedback": "string"
+}
+```
+
+**响应：**
+- 200: "Submission saved"
+- 500: "Error saving submission"
+
+## 环境要求
+
+- Node.js >= 22
+- npm
+
+## 故障排查
+
+- 确保后端和前端都已启动
+- 检查 3000 和 5173 端口是否可用
+- 若请求被拦截，请核对 CORS 配置
+
+---
+
 # Form 2603 - Customer Survey Application
 
 Vue 3 + Node.js survey system.
