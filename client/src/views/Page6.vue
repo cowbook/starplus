@@ -1605,12 +1605,12 @@ export default {
 
 @font-face {
   font-family: 'MyHeiTi';
-  src: url('../assets/myheiti.ttf') format('truetype');
+  src: url('../assets/myheiti.woff2') format('woff2');
 }
 
 @font-face {
   font-family: 'mi';
-  src: url('../assets/misans.ttf') format('truetype');
+  src: url('../assets/misans.woff2') format('woff2');
 }
 
 

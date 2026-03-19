@@ -182,7 +182,7 @@ export default {
 
 @font-face {
   font-family: 'MyHeiTi';
-  src: url('../assets/myheiti.ttf') format('truetype');
+  src: url('../assets/myheiti.woff2') format('woff2');
 }
 
 .p3-title{

@@ -48,9 +48,19 @@ export default {
 
 @font-face {
   font-family: 'mi';
-  src: url('../assets/misans.ttf') format('truetype');
+  src: local('MiSans'),url('./assets/misans.woff2') format('woff2')  format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
 }
 
+@font-face {
+  font-family: 'MyHeiTi';
+  src: url('./assets/myheiti.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
 
 
 html {
