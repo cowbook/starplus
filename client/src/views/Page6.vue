@@ -809,6 +809,7 @@ export default {
               title:'4.11 请问您对公共区域清洁及绿化有什么其他意见?',
               title_en:'Any other suggestions regarding Cleaning & Maintenance of Public Area & Landscaping?',
               value:'',
+              control:'textarea',
               options:[
                 '非常不满意',
                 '不满意',
