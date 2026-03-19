@@ -70,7 +70,7 @@
 
             <div v-else-if="item.title.indexOf('8.1')>=0" class="option-group" style="flex-wrap: wrap;">
 
-                 <label style="margin-bottom:8px;width:120px;margin-top:10px" v-for="(o,ind) in item.options" :key="'opt-' + index + '-' + ind "  class="option-item" :for="'opt-' + index + '-' + ind">
+                 <label style="margin-bottom:8px;width:120px;margin-top:10px" v-for="(o,ind) in item.options" :key="'opt-' + index + '-' + ind "  class="option-item option-item-l" :for="'opt-' + index + '-' + ind">
                   <input type="radio" v-model="item.value" :value="o" alt="选项1" :name="'opt-' + index"  :id="'opt-' + index + '-' + ind " />
                   <span></span>
                    {{o}}
@@ -1655,6 +1655,9 @@ export default {
 
 
 
+
+
+
 .option-item-multiple {
   min-width:48px;
   font-size:10px;
@@ -1674,6 +1677,13 @@ export default {
   margin-left:4px;
   margin-right:11px;
 }
+
+
+.option-item.option-item-l:nth-child(2){
+  margin-left:0px;
+  margin-right:11px;
+}
+
   
  .option-item input[type="radio"] {
     position: absolute;
@@ -1684,7 +1694,6 @@ export default {
   
   /* 自定义未选中状态 */
   .option-item span {
-    
     width: 12px;
     height: 12px;
     border: 2px solid #00b7eb; /* 未选中边框颜色 */
@@ -1692,13 +1701,18 @@ export default {
     pointer-events: none; /* 允许点击穿透 */
     margin-right: 1px;
   }
+
+    .option-item.option-item-l span {
+      margin-right:5px;
+    }
+
   
   /* 自定义选中状态 */
 .option-item input[type="radio"]:checked + span {
     border-color: #00b7eb; /* 选中边框颜色 */
     background: #00b7eb; /* 选中填充色 */
     color: white;
-    font-family:yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
+    font-family:'mi', Helvetica, Arial, sans-serif;
     font-size:16px;
   }
   
@@ -1706,8 +1720,8 @@ export default {
  .option-item input[type="radio"]:checked + span::before {
     content: "√";
     position: relative;
-    top:-3px;
-    left:-2px;
+    top:-5px;
+    left:0px;
   }
 
 
