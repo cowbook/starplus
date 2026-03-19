@@ -1,74 +1,171 @@
 # Form 2603 - 客户调研应用
 
-一个前后端一体化应用：前端使用 Vue 3，后端使用 Node.js，用于收集客户调研反馈。
+基于 Vue 3 + Node.js 的调研系统。
+前端用于收集多页问卷数据，后端将提交结果存储到 MongoDB。
 
 ## 项目结构
 
-- `client/` - Vue 3 前端应用
-- `server/` - Node.js Express 后端 API
+- `client/`: Vue 3 前端
+- `server/`: Express API 后端
+- `docker-compose.yml`: 本地 MongoDB 运行配置
 
-## 功能
+## 技术栈
 
-- 客户调研表单，包含姓名、邮箱和反馈字段
-- 表单提交后将数据保存到服务器上的文本文件
-- 已启用 CORS，支持前后端通信
+- Node.js >= 22
+- Vue 3 + Vue Router + Pinia
+- Express
+- MongoDB（通过 Docker 在本地运行容器）
 
-## 安装与启动
+## 本地 MongoDB（Docker）
 
-1. 安装前端和后端依赖：
-   ```bash
-   cd client && npm install
-   cd ../server && npm install
-   ```
+1. 启动 Docker Desktop（或确保 Docker daemon 已运行）。
+2. 启动本地 MongoDB：
 
-2. 启动后端服务：
-   ```bash
-   cd server && npm start
-   ```
-   服务运行在 http://localhost:3000
+```bash
+cd /Volumes/T4/2026/job/starplus
+docker compose up -d mongodb
+```
 
-3. 启动前端开发服务：
-   ```bash
-   cd client && npm run dev
-   ```
-   前端运行在 http://localhost:5173
+3. 检查 MongoDB 容器状态：
 
-## 使用方式
+```bash
+docker compose ps
+```
 
-1. 在浏览器打开 http://localhost:5173
-2. 填写调研表单
-3. 点击 Submit 提交并保存反馈
-4. 提交结果保存至 `server/submissions.txt`
+4. 需要时停止 MongoDB：
 
-## API
+```bash
+docker compose stop mongodb
+```
 
-### POST /submit
+5. 移除 MongoDB 容器（除非显式删除，否则数据卷会保留）：
 
-提交调研数据。
+```bash
+docker compose down
+```
 
-**请求体：**
+## 后端环境变量
+
+后端从 `server/.env` 读取 MongoDB 连接配置。
+
+示例：
+
+```env
+MONGODB_URI=mongodb://127.0.0.1:27017
+MONGODB_DB_NAME=starplus
+ADMIN_KEY=change-this-admin-key
+```
+
+模板文件：
+
+- `server/.env.example`
+
+## 安装与运行
+
+1. 安装依赖：
+
+```bash
+cd /Volumes/T4/2026/job/starplus/client && npm install
+cd /Volumes/T4/2026/job/starplus/server && npm install
+```
+
+2. 启动后端：
+
+```bash
+cd /Volumes/T4/2026/job/starplus/server
+npm start
+```
+
+后端监听 `http://localhost:3000`。
+
+3. 启动前端：
+
+```bash
+cd /Volumes/T4/2026/job/starplus/client
+npm run dev
+```
+
+前端运行在 `http://localhost:5173`。
+
+## API 接口
+
+所有接口都挂载在 `/api` 路径下。
+
+### POST /api/submit
+
+将一条问卷提交数据保存到 MongoDB。
+
+请求体：任意 JSON 对象（表单数据）。
+
+存储文档结构示例：
+
 ```json
 {
-  "name": "string",
-  "email": "string",
-  "feedback": "string"
+   "...form fields": "...",
+   "createdAt": "2026-03-18T12:34:56.789Z",
+   "ip": "client ip"
 }
 ```
 
-**响应：**
-- 200: "Submission saved"
-- 500: "Error saving submission"
+响应示例：
 
-## 环境要求
+```json
+{
+   "message": "Submission saved",
+   "id": "mongodb_object_id"
+}
+```
 
-- Node.js >= 22
-- npm
+### GET /api/submissions
+
+读取提交历史（按时间倒序，最新在前）。
+
+该接口仅管理员可访问。
+请求头需携带：
+
+```text
+x-admin-key: your-admin-key
+```
+
+### POST /api/webhook
+
+从仓库拉取最新代码。
+
+### GET /api/download
+
+已废弃接口，返回 HTTP 410。
+
+## 反向代理说明
+
+后端已启用 `trust proxy`，并按以下顺序读取客户端 IP：
+
+1. `x-forwarded-for`（取首个 IP）
+2. `x-real-ip`
+3. Express socket IP 兜底
+
+Nginx 请确保转发以下头：
+
+```nginx
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+proxy_set_header X-Real-IP $remote_addr;
+```
+
+## 管理页面
+
+管理页面地址：
+
+```text
+/admin
+```
+
+页面会要求输入 `server/.env` 中配置的 admin key。
+验证通过后，会从 `/api/submissions` 读取提交数据。
 
 ## 故障排查
 
-- 确保后端和前端都已启动
-- 检查 3000 和 5173 端口是否可用
-- 若请求被拦截，请核对 CORS 配置
+- 如果 `docker compose up` 报 Docker daemon 错误，请先启动 Docker Desktop。
+- 如果后端连接 MongoDB 失败，请检查 `server/.env` 中的 `MONGODB_URI`。
+- 如果 3000 端口被占用，请在 `npm start` 前先停止旧进程。
 
 ---
 
