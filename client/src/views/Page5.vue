@@ -31,7 +31,7 @@
           <div>
             <img class="h1" :src="h1" alt="客户满意率调查" />
             <div class="title-desc">
-              Tenants'Satisfaction Survey
+              Tenants' Satisfaction Survey
             </div>
 
           </div>
