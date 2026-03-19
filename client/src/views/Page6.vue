@@ -1419,12 +1419,13 @@ export default {
         blockName: '物业',
         name: '姓名',
         mobile: '手机号',
+        area:'区域',
         unit: '单元',
         company: '公司名称',
-        subdate: '调查日期'
+        subdate: '调查日期',
       };
 
-      const basicFieldOrder = ['blockName', 'name', 'mobile', 'unit', 'company', 'subdate'];
+      const basicFieldOrder = ['blockName', 'name', 'mobile', 'area', 'unit', 'company', 'subdate'];
 
       const entries = [];
       const usedKeySet = new Set();
@@ -1607,6 +1608,12 @@ export default {
   src: url('../assets/myheiti.ttf') format('truetype');
 }
 
+@font-face {
+  font-family: 'mi';
+  src: url('../assets/misans.ttf') format('truetype');
+}
+
+
 .item-textarea{
   margin:20px 15px 0 15px;
   width:100%;
@@ -1731,7 +1738,7 @@ export default {
   
   background-color: #533278;
   color: #fff;
-  font-family: yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
+  font-family: mi, yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
   font-size: 16px;
   letter-spacing: 2px;
   width:70%;
@@ -2019,10 +2026,10 @@ export default {
 .title-desc{
   text-align: left;
   padding: 0 16px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   color: #2c3e50;
-  font-family: 'MyHeiTi', yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
+  font-family: 'mi', Microsoft YaHei, Arial, sans-serif;
 }
 
 .h1-icon{

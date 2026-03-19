@@ -45,6 +45,14 @@ export default {
 </script>
 
 <style>
+
+@font-face {
+  font-family: 'mi';
+  src: url('../assets/misans.ttf') format('truetype');
+}
+
+
+
 html {
     height: 100%;
     width:100%;
@@ -58,10 +66,11 @@ body{
     width:100%;
     min-width: 100%;
 
+    font-family: 'mi','Microsoft YaHei','SimHei', Helvetica, Arial, sans-serif;
+
 
 }
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;

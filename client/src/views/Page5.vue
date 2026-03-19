@@ -65,7 +65,26 @@
             <input type="text" class="input-field" name="mobile" placeholder="手机号码" v-model="form.mobile" />
           </div>
 
-            <div class="input-group">
+          <div class="input-group">
+            <div class="blue-border"></div>
+            <label class="input-label">区域/Area</label>
+            <div class="radio-set">
+
+              <div class="set" :class="form.area === '商场' ? 'active' : ''" @click="form.area = '商场'">
+                <input type="radio" id="r1" class="r1" name="area" value="商场" v-model="form.area" />
+                <label class="r-text" for="r1">商场</label>
+              </div>
+
+              <div class="set" :class="form.area === '写字楼' ? 'active' : ''" style="margin-left:6px" @click="form.area = '写字楼'">
+                <input type="radio" id="r2" class="r2" name="area" value="写字楼" v-model="form.area" />
+                <label class="r-text" for="r2">写字楼</label>
+              </div>
+            </div>
+          </div>
+
+
+
+          <div class="input-group">
             <div class="blue-border"></div>
             <label class="input-label">单元/Unit</label>
             <input type="text" class="input-field" name="unit" placeholder="单元" v-model="form.unit" />
@@ -191,7 +210,8 @@ export default {
         mobile: '',
         unit: '',
         company: '',
-        subdate: today
+        subdate: today,
+        area:''
       },
       showModal: false,
       message: ''
@@ -434,6 +454,33 @@ export default {
     padding:20px 65px 20px 45px;
     
 }
+.radio-set{
+  flex:1;
+  display: flex;
+  justify-content: flex-end;
+  padding:0 12px;
+  font-size:14px;
+}
+
+.set{
+  padding:3px 6px;
+  border:1px solid #DDD;
+  border-radius: 3px;
+}
+
+.active{
+  border:1px solid #00b7eb;
+}
+
+
+.r1,.r2 {
+  position: relative;
+  top:2px;
+}
+
+
+
+
 
 .input-group {
   width:100%;
