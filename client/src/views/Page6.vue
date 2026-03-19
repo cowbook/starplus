@@ -311,7 +311,7 @@ export default {
               title:'2.2 前台礼宾服务',
               small:'(含访客登记、雨伞借用)',
               value:'',
-              title_en:'Concierge Staff',
+              title_en:'Concierge Service',
               options:[
                 '非常不满意',
                 '不满意',
@@ -331,7 +331,7 @@ export default {
               title:'2.3 晨间迎宾服务及指引',
               small:'(如适用)',
               value:'',
-              title_en:'Concierge Staff',
+              title_en:'Peak Hour Service of Direction（If  applicable）',
               options:[
                 '非常不满意',
                 '不满意',
@@ -355,7 +355,7 @@ export default {
           items:[
             {
               title:'2.4 咨询和投诉的处理',
-              title_en:'Handling of Inquiries & Complaints',
+              title_en:'Handling of Inquiry & Complaints',
               value:'',
               options:[
                 '非常不满意',
@@ -375,7 +375,7 @@ export default {
             {
               title:'2.5 服务响应效率',
               value:'',
-              title_en:'Service Response Efficiency',
+              title_en:'Service Feedback Efficiency',
               options:[
                 '非常不满意',
                 '不满意',
@@ -394,7 +394,7 @@ export default {
             {
               title:'2.6 配合租户的活动需求响应',
               value:'',
-              title_en:'Assistance to Tenants Event Requirements',
+              title_en:'Assistance in Tenant Event Requirments',
               options:[
                 '非常不满意',
                 '不满意',
@@ -418,7 +418,7 @@ export default {
           items:[
             {
               title:'2.7 信息发布与通知工作',
-              title_en:'Information Release & Notification',
+              title_en:'Information Release and Notification',
               value:'',
               options:[
                 '非常不满意',
@@ -436,10 +436,10 @@ export default {
               ]
             },
             {
-              title:'2.8 请问您对客户服务有什么意见?',
+              title:'2.8 请问您对客户服务有什么其他意见？',
               control:'textarea',
               value:'',
-              title_en:'Any suggestions for our customer service?'
+              title_en:'Do you have any other suggestions regarding customer service?'
             }
           ]
         },
@@ -469,7 +469,7 @@ export default {
             {
               title:'3.2 维修响应及收费合理性',
               value:'',
-              title_en:'Timely Response & Reasonable Charges',
+              title_en:'Timely Response & Reasonable charges',
               options:[
                 '非常不满意',
                 '不满意',
@@ -488,7 +488,7 @@ export default {
             {
               title:'3.3 中央空调舒适度',
               value:'',
-              title_en:'Central Air Conditioning Comfort',
+              title_en:'Comfort of Centralized Air-conditioning System',
               options:[
                 '非常不满意',
                 '不满意',
@@ -512,7 +512,7 @@ export default {
           items:[
             {
               title:'3.4 电梯及扶手电梯',
-              title_en:'Elevators & Escalators',
+              title_en:'Lifts and Escalators',
               value:'',
               options:[
                 '非常不满意',
@@ -549,10 +549,10 @@ export default {
               ]
             },
             {
-              title:'3.6 茶水音',
+              title:'3.6 茶水间',
               small:'(如适用)',
               value:'',
-              title_en:'Pantry(if applicable)',
+              title_en:'Pantry（If applicable）',
               options:[
                 '非常不满意',
                 '不满意',
@@ -576,9 +576,9 @@ export default {
           items:[
             {
               title:'3.7 装修管理',
-              small:'异味、噪音、粉尘、施工人员管理',
+              small:'(异味、噪音、粉尘、施工人员管理)',
               title_en:'Fitting-out Management',
-              small_en:'Odors,NoiseDust,Workers management',
+              small_en:'(Odors, Noise, Dust, Workers management)',
               value:'',
               options:[
                 '非常不满意',
@@ -599,7 +599,7 @@ export default {
               title:'3.8 请问您对设施维护有什么其他意见?',
               control:'textarea',
               value:'',
-              title_en:'Any suggestions for our facilities & maintenance?'
+              title_en:'Do you have any other suggestions regarding Facilities and Maintenance?'
             }
           ]
         },
@@ -661,24 +661,6 @@ export default {
                 'Satisfied',
                 'Excellent'
               ]
-            },{
-              title:'4.3 清洁频率',
-              title_en:'Frequency of Cleaning',
-              value:'',
-              options:[
-                '非常不满意',
-                '不满意',
-                '一般',
-                '满意',
-                '非常满意',
-              ],
-              options_en:[
-                'Poor',
-                'Dissatisfied',
-                'Fair',
-                'Satisfied',
-                'Excellent'
-              ]
             }
           ]
         },'page14':{
@@ -687,7 +669,7 @@ export default {
           items:[
             {
               title:'4.4 大堂及外墙清洁状况',
-              title_en:'Main Lobby & Exteror Wall',
+              title_en:'Main Lobby & Exterior Wall',
               value:'',
               options:[
                 '非常不满意',
@@ -723,7 +705,7 @@ export default {
               ]
             },{
               title:'4.6 电梯及扶手电梯清洁状况',
-              title_en:'Lifs & Escalators',
+              title_en:'Lifts and Escalators',
               value:'',
               options:[
                 '非常不满意',
@@ -764,7 +746,7 @@ export default {
                 'Excellent'
               ]
             },{
-              title:'4.8 卫生音易耗品补给及时性',
+              title:'4.8 卫生间易耗品补给及时性',
               title_en:'Timely Replenishment of Washroom Supplies',
               value:'',
               options:[
@@ -945,7 +927,7 @@ export default {
               ]
             },{
               title:'5.6 交通指引及安全管控',
-              title_en:'Traffic Guidance & Safety Management',
+              title_en:'Traffic Guidance and Safety Management',
               value:'',
               options:[
                 '非常不满意',
@@ -969,9 +951,9 @@ export default {
           items:[
             {
               title:'5.7 请问您对保安及消防安全有什么其他意见?',
-              title_en:'Any other segguestion regarding Security & Fire Safety',
-              control:'textarea'
-              
+              title_en:'Any other suggestions regarding Security & Fire Safety?',
+              control:'textarea',
+              value:''
             }
           ]
         },'page20':{
@@ -1075,8 +1057,8 @@ export default {
                 'Excellent'
               ]
             },{
-              title:'6.6 请问您对停车场管理有什么其它意见?',
-              title_en:'Any other suggestions regarding Car Paking?',
+              title:'6.6 请问您对停车场管理有什么其他意见？',
+              title_en:'Do you have any other suggestions regarding Car Parking ?',
               value:'',
               options:[
                 '非常不满意',
@@ -1096,7 +1078,7 @@ export default {
           ]
         },'page22':{
           title:'7.其他物业服务',
-          title_en:'Other Service',
+          title_en:'Other Services',
           items:[
             {
               title:'7.1 节日装饰',
@@ -1157,7 +1139,7 @@ export default {
         },
         'page23':{
           title:'7.其他物业服务',
-          title_en:'Other Service',
+          title_en:'Other Services',
           items:[
             {
               title:'7.4 外卖管理',
@@ -1180,7 +1162,7 @@ export default {
             },{
               title:'7.5 母婴室',
               small:'(如适用)',
-              title_en:'Nursing Room (if applicable)',
+              title_en:'Nursing Room（if applicable）',
               value:'',
               options:[
                 '非常不满意',
@@ -1199,7 +1181,6 @@ export default {
             }
           ]
         },
-        
         'page24':{
           title:'8.活动参与',
           title_en:'Activity Participation',
@@ -1222,8 +1203,8 @@ export default {
               ]
             },{
               title:'8.2 您喜欢哪种类型的活动?',
-              small:'可多选',
-              title_en:'What kind of activity do you prefer?(multiple-choice)',
+              small:'(可多选)',
+              title_en:'What kind of activity do you prefer?（multiple-choice ）',
               control:'multiple',
               value:[],
               options:[
@@ -1251,19 +1232,19 @@ export default {
           items:[
             {
               title:'9.1 您对物业管理中心的ESG工作有哪些建议或意见?',
-              title_en:'What Suggestions do you have on the ESG of the property management center?',
+              title_en:'What opinions or suggestions do you have on the ESG of the property management center?',
               value:'',
               control:'textarea'
 
             },{
-              title:'9.2 企业是否需要物管中心提供协助以实现ESG目标',
+              title:'9.2 企业是否需要物管中心提供协助, 以实现ESG目标?',
               title_en:'Do companies require assistance from property management center to fulfill their ESG obligations?',
               value:'',
               control:'textarea'
 
             },{
-              title:'9.3对于大厦/商场节能减排工作您有什么建议?',
-              title_en:'Do you have any secific suggestions for energy conservation and emission reduction measures in building or shopping malls?',
+              title:'9.3 对于大厦/商场节能减排工作，您有什么建议？',
+              title_en:'Do you have any specific suggestions for energy conservation and emission reduction measures in buildings or shopping malls?',
               value:'',
               control:'textarea'
             }
