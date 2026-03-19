@@ -41,7 +41,7 @@
 
       </div>
 
-      <div class="segment" style="height:200px">
+      <div class="segment" style="height:260px">
 
      
 
@@ -229,7 +229,7 @@ export default {
 
 
 .card.c3{
-  margin-bottom: -30px;
+  margin-bottom: -20px;
 }
 
 .card.c4{

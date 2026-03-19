@@ -331,7 +331,7 @@ export default {
               title:'2.3 晨间迎宾服务及指引',
               small:'(如适用)',
               value:'',
-              title_en:'Peak Hour Service of Direction（If  applicable）',
+              title_en:'Peak Hour Service of Direction (If applicable)',
               options:[
                 '非常不满意',
                 '不满意',
@@ -394,7 +394,7 @@ export default {
             {
               title:'2.6 配合租户的活动需求响应',
               value:'',
-              title_en:'Assistance in Tenant Event Requirments',
+              title_en:'Assistance in Tenant Event Requirements',
               options:[
                 '非常不满意',
                 '不满意',
@@ -1059,7 +1059,8 @@ export default {
               ]
             },{
               title:'6.6 请问您对停车场管理有什么其他意见？',
-              title_en:'Do you have any other suggestions regarding Car Parking ?',
+              title_en:'Do you have any other suggestions regarding Car Parking?',
+              control:'textarea',
               value:'',
               options:[
                 '非常不满意',
@@ -1163,7 +1164,7 @@ export default {
             },{
               title:'7.5 母婴室',
               small:'(如适用)',
-              title_en:'Nursing Room（if applicable）',
+              title_en:'Nursing Room (if applicable)',
               value:'',
               options:[
                 '非常不满意',
@@ -1205,7 +1206,7 @@ export default {
             },{
               title:'8.2 您喜欢哪种类型的活动?',
               small:'(可多选)',
-              title_en:'What kind of activity do you prefer?（multiple-choice ）',
+              title_en:'What kind of activity do you prefer? (multiple-choice)',
               control:'multiple',
               value:[],
               options:[
@@ -1219,7 +1220,7 @@ export default {
               options_en:[
                 'Sports & Competitive games',
                 'Performance',
-                'Handicaft',
+                'Handicraft',
                 'Charitable Events',
                 'Art exhibitions',
                 'Gift redemptions'
