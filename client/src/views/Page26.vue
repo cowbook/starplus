@@ -118,7 +118,6 @@ import { useFormStore } from '../stores/form';
 import logo from '../assets/page2_logo_top_left.png'
 import textTop from '../assets/page_title.svg'
 import main from '../assets/page2_main2.svg'
-import btnStart from '../assets/page2_btnstart.svg'
 import arrow from '../assets/page2_arrow.png'
 import btnStar from '../assets/page2_btnstar_topright.png'
 import btnDown from '../assets/page2_btndown_topright.png'
@@ -149,7 +148,6 @@ export default {
       logo,
       textTop,
       main,
-      btnStart,
       btnStar,
       btnDown,
       arrow,

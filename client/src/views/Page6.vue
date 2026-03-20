@@ -133,7 +133,7 @@
       </div>
 
       <div class="segment" v-else>
-        <div class="row">
+        <div class="row" style="min-width:350px;">
 
           <div class="blue-btn-l" @click="p6_goNext(-1)">
                 上一页
@@ -2154,13 +2154,13 @@ export default {
 
 
 .blue-btn-l {
-  margin: 0px auto 30px auto;
-  width: 140px;
-  height: 55px;
-  line-height: 55px;
+  margin: 20px auto 30px auto;
+  width: 120px;
+  height: 48px;
+  line-height: 48px;
   background-image: url('../assets/blue_btn.png');
   background-repeat: no-repeat;
-  background-size: 140px auto;
+  background-size: 120px auto;
   color: white;
 
   font-size: 14px;

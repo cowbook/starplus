@@ -1,43 +1,56 @@
 <template>
-  <div class="page-bg" @click="goNext">
-  <div class="page appear-container">
+  <div class="page-bg appear-container" @click="goNext">
+
+
+
+
     <header class="hero appear-item" data-delay="0.1">
 
       <div class="hero-top bg-line">
-        <img class="logo" :src="logo" alt="STARPLUS Logo" />
-        <img class="year" :src="year" alt="2025" />
-      </div>
 
-      <div style="height:290px;" class="bg-line">
-        <img class="title" :src="mainText" alt="客户满意率调查" />
-
-        <div class="icon-group">
-
-          <img class="download" :src="downIcon" alt="下载" />
-          <img class="clickicon" :src="clickicon" alt="Card Background" />
-
+        <div class="row">
+          <img class="logo" :src="logo" alt="STARPLUS Logo" />
+          <img class="year" :src="year" alt="2025" />
         </div>
         
+      </div>
+
+      <div  class="bg-line">
+        
+        <div class="row" style="justify-content: center;">
+
+          <div>
+
+            <img class="title" :src="mainText" alt="客户满意率调查" />
+
+          
+            <div class="icon-group">
+
+              <img class="download" :src="downIcon" alt="下载" />
+              <img class="clickicon" :src="clickicon" alt="Card Background" />
+
+            </div>
+          </div>
+        </div>
       </div>
     </header>
 
     <main class="content bg-line appear-item" data-delay="0.25">
 
-      <img class="card" :src="card" alt="Card Background" />
-
-
-      <img class="fold" :src="fold" alt="Card Background" />
-
-
-      
-
+      <div class="row">
+        <div style="margin:0 auto;">
+          <img class="card" :src="card" alt="Card Background" />
+          <img class="fold" :src="fold" alt="Card Background" />
+        </div>
+      </div>
       
     </main>
 
-    <footer style="height: 169px;width:100%">
-      <img class="footer-decor appear-item" data-delay="0.4" :src="starplus" alt="STARPLUS" />
+    <footer style="height: 69px;width:100%">
+      <div class="row">
+        <img class="footer-decor appear-item" data-delay="0.4" :src="starplus" alt="STARPLUS" />
+      </div>
     </footer>
-  </div>
   </div>
 </template>
 
@@ -76,7 +89,7 @@ export default {
     // 下一帧添加类，让 transition 生效
     this.$nextTick(() => {
       setTimeout(() => {
-        document.querySelector('.page')?.classList.add('appeared')
+        document.querySelector('.page-bg')?.classList.add('appeared')
       }, 1000)  // 轻微延迟更自然
     })
   },
@@ -113,7 +126,6 @@ export default {
 
 .icon-group{
   margin-top:-30px;
-  padding:0 50px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -134,9 +146,27 @@ export default {
   
 }
 
+
+.row{
+    margin:0 auto;
+    max-width:500px;
+    width:100%;
+    box-sizing: border-box;
+    padding:10px 55px 0px 35px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+
 .page-bg {
   height: 100%;
   width: 100%;
+
+  background-image: url('../assets/page1_bg_left.png');
+  background-position: left top;
+  background-repeat: repeat-y;
+
   /*
   background-position: left top;
   background-repeat: repeat-x;
@@ -156,8 +186,7 @@ export default {
 
 .page {
   
-  background-image: url('../assets/page1_bg_left.png');
-  background-position: left top;
+
   background-repeat: no-repeat;
   width: 100%;
   max-width: 500px; /* 设计稿 500px */
@@ -171,7 +200,6 @@ export default {
 
 .hero {
   width: 100%;
-  max-width: 840px;
   text-align: center;
 }
 
@@ -185,17 +213,20 @@ export default {
 }
 
 .logo {
+  margin-top:-10px;
   width: 130px;
-  margin-left:50px;
+  margin-left:15px;
 }
 
 .year {
-  width: 160px;
+  max-width: 160px;
+  width:50%;
   margin-right: 50px;
 }
 
 .title {
-  width: 330px;
+  max-width: 330px;
+  width:90%;
   margin: 0 auto;
   display: block;
 }
@@ -206,14 +237,14 @@ export default {
   width: 100%;
   margin:0;
   height: 300px;
+  padding-bottom: 40px;
 }
 
 .card {
-
   display: block;
   z-index: 100;
   position: relative;
-  left:29px;
+  left:-19px;
   top:-20px;
   width: 210px;
 
@@ -223,8 +254,11 @@ export default {
 
 .fold{
   position: relative;
-  top: -110px;
+  top: -70px;
+  left:30px;
   width: 240px;
+  filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, 0.36));
+
 }
 
 .card-bg {
@@ -289,7 +323,7 @@ export default {
 .footer-decor {
   display: block;
   width: 150px;
-  margin:-28px auto 0 60px;
+  margin:-28px auto 0 10px;
 }
 
 

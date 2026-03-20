@@ -106,34 +106,49 @@
 
         </div>
 
+        <div class="row">
 
-        <div class="footer-zh">
-          你的建议对我们很重要<br>
-                    对于您们的反馈我们将十分感谢
+          <div style="margin:0 auto;">
+
+            <div class="footer-zh">
+              你的建议对我们很重要<br>
+                        对于您们的反馈我们将十分感谢
+
+            </div>
+
+         <br>
+
+            <div class="footer-en">
+              Your opinion is valuable to us and your<br>
+              feedbacks are highly appreciated
+            </div>
+
+          </div>
 
         </div>
-
-     
-
-        <div class="footer-en">
-          Your opinion is valuable to us and your<br>
-          feedbacks are highly appreciated
-        </div>
-
-
 
       </div>
 
-      <div class="row appear-item" data-delay="0.4">
+      <div class="row appear-item" data-delay="0.4" style="padding-bottom:50px;justify-content: center;">
 
-        <div class="blue-btn" @click="goBack()">
-          上一页
+
+
+        <div style="display:flex;justify-content: space-between;width:100%;max-width: 290px;">
+
+          <div style="">
+            <div class="blue-btn" @click.stop="goBack()">
+              上一页
+            </div>
+          </div>
+
+          <div>
+            <div class="blue-btn" @click="goNext()">
+              提交
+            </div>
+          </div>
         </div>
 
-
-        <div class="blue-btn" @click="goNext()">
-          提交
-        </div>
+        
       </div>
 
     </div>
@@ -356,17 +371,19 @@ export default {
   src: url('../assets/myheiti.woff2') format('woff2');
 }
 
+
+
 .blue-btn {
-  margin: 0px auto 30px auto;
-  width: 140px;
-  height: 55px;
-  line-height: 55px;
+  padding:0 0 0 4px;
+  width: 130px;
+  height: 50px;
+  line-height: 50px;
   background-image: url('../assets/blue_btn.png');
   background-repeat: no-repeat;
-  background-size: 140px auto;
+  background-size: 130px auto;
   color: white;
 
-  font-size: 14px;
+  font-size: 12px;
   font-family: 'MyHeiTi', yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
   text-align: center;
   cursor: pointer;
@@ -375,6 +392,7 @@ export default {
 
   letter-spacing: 2px;
 }
+
 .page5 {
 
   min-height: 100vh;
@@ -436,7 +454,7 @@ export default {
 }
 
 .row{
-
+  margin:0 auto;
     max-width:500px;
     width:100%;
     box-sizing: border-box;
@@ -444,7 +462,7 @@ export default {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-}
+  }
 
 .form {
 
@@ -452,6 +470,7 @@ export default {
     width:100%;
     box-sizing: border-box;
     padding:20px 65px 20px 45px;
+    margin:0 auto;
     
 }
 .radio-set{

@@ -127,7 +127,6 @@ import { useFormStore } from '../stores/form';
 
 import logo from '../assets/page2_logo_top_left.png'
 import textTop from '../assets/page_title.svg'
-import btnStart from '../assets/page2_btnstart.svg'
 import arrow from '../assets/page2_arrow.png'
 import btnStar from '../assets/page2_btnstar_topright.png'
 import btnDown from '../assets/page2_btndown_topright.png'
@@ -158,7 +157,6 @@ export default {
       p1,p2,p3,p4,p4,p5,p6,p7,p8,
       logo,
       textTop,
-      btnStart,
       btnStar,
       btnDown,
       arrow,
@@ -306,7 +304,7 @@ export default {
   justify-content: space-between;;
   font-size:13px;
   font-family: 'Heiti', Microsoft YaHei, Helvetica, Arial, sans-serif;
-  padding:10px 40px 0 43px;
+  padding:10px 40px 0 23px;
   font-weight: 800;
   color:#666;
   text-align: left;
@@ -318,7 +316,7 @@ export default {
   width:100%;
   display:flex; 
   justify-content: space-between;
-  padding: 0 30px 10px 30px;
+  padding: 0 30px 10px 15px;
   
 }
 
@@ -326,7 +324,9 @@ export default {
   position: relative;
   display: inline-block;
   width: 170px;
+  margin-right:9px;
   cursor: pointer;
+
 }
 
 .item img {

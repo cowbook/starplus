@@ -24,62 +24,65 @@
         
       </div>
 
-      <div class="segment seg2"></div>
 
       <div class="segment seg3 appear-item" data-delay="0.25">
+        <div class="row">
         <img class="main" :src="main" alt="主要内容" />
+        </div>
       </div>
 
 
 
     <main class="content">
 
-      <div class="segment">
+      <div class="segment" style="padding-bottom: 20px;">
         <div class="row">
 
 
-          <img class="p3-title appear-item" :src="p3_title" alt="主要内容" data-delay="0.1"/>
+          <img class="p3-title appear-item" :src="p3_title" alt="操作介绍" data-delay="0.1"/>
 
-         
+
         </div>
 
         <div class="card-col appear-item" data-delay="0.1">
 
           <img class="card" :src="c1" alt="c1" />
+          <img class="arrow" :src="arrow" alt="箭头" />
+
         </div>
-        
+
+
+        <div class="row" style="box-sizing: border-box; padding:0 60px 0 30px;margin-top:-70px;display:flex;flex-wrap:nowrap;justify-content:space-between;">
+
+          <div style="margin-right:40px;">
+            <div class="blue-btn" @click.stop="goBack()" style="z-index:100;position:relative;left:27px;">
+              上一页
+            </div>
+          </div>
+
+          <div style="">
+            <div class="blue-btn" @click="goNext()">
+              点击确认开始
+            </div>
+          </div>
+        </div>
+
+
+
+
+              
 
       </div>
 
    
 
 
-      <img class="arrow" :src="arrow" alt="箭头" />
 
     
     </main>
 
 
-      <div class="segment seg4 appear-item" data-delay="0.1">
-
-        
-
-
-        <div style="display:flex">
-
-          <div class="blue-btn" @click.stop="goBack()" style="z-index:100;position:relative;left:27px;">
-            上一页
-          </div>
-
-          <div class="blue-btn" @click="goNext()">
-            点击确认开始
-          </div>
-          
-        </div>
-
-        
-
-      </div>
+      
       <div class="segment seg5 appear-item" data-delay="0.4" >
 
 
@@ -87,8 +90,8 @@
 
 
       </div>
-      <div class="segment seg6">
-      </div>
+      <div style="height:90px"></div>
+   
     </div>
 
 
@@ -105,7 +108,6 @@
 import logo from '../assets/page2_logo_top_left.png'
 import textTop from '../assets/page_title.svg'
 import main from '../assets/page2_main2.svg'
-import btnStart from '../assets/page2_btnstart.svg'
 import arrow from '../assets/page2_arrow.png'
 import btnStar from '../assets/page2_btnstar_topright.png'
 import btnDown from '../assets/page2_btndown_topright.png'
@@ -125,7 +127,6 @@ export default {
       logo,
       textTop,
       main,
-      btnStart,
       btnStar,
       btnDown,
       arrow,
@@ -162,16 +163,16 @@ export default {
 
 
 .blue-btn {
-  margin: -35px 60px 0 auto;
-  width: 140px;
-  height: 55px;
-  line-height: 55px;
+  padding:0 0 0 4px;
+  width: 130px;
+  height: 50px;
+  line-height: 50px;
   background-image: url('../assets/blue_btn.png');
   background-repeat: no-repeat;
-  background-size: 140px auto;
+  background-size: 130px auto;
   color: white;
 
-  font-size: 14px;
+  font-size: 12px;
   font-family: 'MyHeiTi', yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
   text-align: center;
   cursor: pointer;
@@ -233,7 +234,7 @@ export default {
 
     max-width:500px;
     width:100%;
-
+    margin:0 auto;
     padding:20px 0px 0px 0px;
     display: flex;
     align-items: flex-start;
@@ -256,8 +257,8 @@ export default {
 
 .card {
   position: relative;
-  left:90px;
-  width: 260px;
+  left:40px;
+  width: 250px;
   height: auto;
   display: block;
   margin: 20px 10px;
@@ -268,7 +269,7 @@ export default {
 
 
 .card-col {
-  margin: 0 auto 0 25px;
+  margin: 0 auto;
   width: 300px;
 }
 
@@ -359,7 +360,7 @@ export default {
 
 .seg5 {
   height: 87px;
-    text-align: right;
+  text-align: right;
 }
 
 .seg6 {
@@ -371,9 +372,9 @@ export default {
 
 .footer-text {
     position: relative;
-    top:40px;
+    top:55px;
     left:-45px;
-    width: 240px;
+    width: 170px;
     height: auto;
 }
 
