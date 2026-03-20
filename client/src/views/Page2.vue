@@ -45,26 +45,13 @@
 
         <div class="card-col appear-item" data-delay="0.1">
 
-          <img class="card c1" :src="c1" alt="c1" />
-          <img class="card c2" :src="c2" alt="c2" />
+          <img class="card" :src="c1" alt="c1" />
         </div>
         
 
       </div>
 
-      <div class="segment" style="height:280px">
-
-     
-
-        <div class="card-col-right appear-item" data-delay="0.1">
-
-          <img class="card c3" :src="c3" alt="c3" />
-          <img class="card c4" :src="c4" alt="c4" />
-
-
-        </div>
-
-      </div>
+   
 
 
       <img class="arrow" :src="arrow" alt="箭头" />
@@ -128,10 +115,8 @@ import bgLeft from '../assets/page2_bg_left_2x.png'
 import bgRight from '../assets/page2_bg_right_2x.png'
 import bgLine from '../assets/page2_bg_horizontal_line.png'
 import p3_title from '../assets/page3_title.svg'
-import c1 from '../assets/page3_c1.png'
-import c2 from '../assets/page3_c2.png'
-import c3 from '../assets/page3_c3.png'
-import c4 from '../assets/page3_c4.png'
+import c1 from '../assets/page2_nc.png'
+
 
 export default {
   name: 'Page2',
@@ -150,10 +135,8 @@ export default {
       bgRight,
       bgLine,
       p3_title,
-      c1,
-      c2,
-      c3,
-      c4
+      c1
+     
     }
   },
   mounted() {
@@ -257,28 +240,32 @@ export default {
     justify-content: space-between;
 }
 
+
+.btn-star {
+    margin-top:30px;
+    width: 32px;
+    height: auto;
+}
+
+
 .p3-title {
-  width: 140px;
+  width: 120px;
   display: block;
   margin: 0 auto;
 }
 
 .card {
-  width: 200px;
+  position: relative;
+  left:90px;
+  width: 260px;
   height: auto;
   display: block;
-  margin: 0 10px;
+  margin: 20px 10px;
   margin-bottom: -60px;
-  filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.26));
+  filter: drop-shadow(3px 3px 3px rgba(0, 0, 0, 0.26));
+  transform: rotate(-8deg);
 }
 
-.card.c3 {
-  margin-bottom: -20px;
-}
-
-.card.c4 {
-  width: 180px;
-}
 
 .card-col {
   margin: 0 auto 0 25px;
@@ -321,11 +308,7 @@ export default {
   height: auto;
 }
 
-.btn-star {
-    margin-top:30px;
-    width: 32px;
-    height: auto;
-}
+
 
 
 
@@ -342,7 +325,7 @@ export default {
 }
 
 .main {
-  width:400px;
+  width:280px;
   height: auto;
 
   filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, 0.36));
@@ -350,7 +333,7 @@ export default {
 }
 
 .seg4 {
-  margin-top:-130px;
+  margin-top:-30px;
   height: 40px;
   justify-content: center;
   padding-top: 20px;
@@ -364,9 +347,11 @@ export default {
 
 .arrow{
     position: relative;
-    left: -120px;
-    top:-230px;
+    left: -90px;
+    top:-30px;
     width: 124px;
+    /*左右翻转*/
+    transform: rotate(15deg);
 
 
 }
