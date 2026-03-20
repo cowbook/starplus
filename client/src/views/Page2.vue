@@ -348,7 +348,7 @@ export default {
 .arrow{
     position: relative;
     left: -90px;
-    top:-30px;
+    top:-230px;
     width: 124px;
     /*左右翻转*/
     transform: rotate(15deg);
