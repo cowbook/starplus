@@ -115,7 +115,7 @@ import bgLeft from '../assets/page2_bg_left_2x.png'
 import bgRight from '../assets/page2_bg_right_2x.png'
 import bgLine from '../assets/page2_bg_horizontal_line.png'
 import p3_title from '../assets/page3_title.svg'
-import c1 from '../assets/page2_nc.svg'
+import c1 from '../assets/page2_cardnc.svg'
 
 
 export default {
