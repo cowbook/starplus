@@ -138,7 +138,7 @@ apiRouter.post('/webhook', (req, res) => {
   const runWebhookPipeline = async () => {
     const steps = [
       { name: 'git pull', command: 'git pull --ff-only origin main' },
-      { name: 'client install', command: 'npm --prefix client install' },
+      { name: 'client install', command: 'npm --prefix client install --include=dev' },
       { name: 'client build', command: 'npm --prefix client run build' }
     ];
 
