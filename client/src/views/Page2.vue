@@ -30,11 +30,53 @@
         <img class="main" :src="main" alt="主要内容" />
       </div>
 
+
+
+    <main class="content">
+
+      <div class="segment">
+        <div class="row">
+
+
+          <img class="p3-title appear-item" :src="p3_title" alt="主要内容" data-delay="0.1"/>
+
+         
+        </div>
+
+        <div class="card-col appear-item" data-delay="0.1">
+
+          <img class="card c1" :src="c1" alt="c1" />
+          <img class="card c2" :src="c2" alt="c2" />
+        </div>
+        
+
+      </div>
+
+      <div class="segment" style="height:280px">
+
+     
+
+        <div class="card-col-right appear-item" data-delay="0.1">
+
+          <img class="card c3" :src="c3" alt="c3" />
+          <img class="card c4" :src="c4" alt="c4" />
+
+
+        </div>
+
+      </div>
+
+
+      <img class="arrow" :src="arrow" alt="箭头" />
+
+    
+    </main>
+
+
       <div class="segment seg4 appear-item" data-delay="0.1">
 
         
 
-        <img class="arrow" :src="arrow" alt="箭头" />
 
         <div style="display:flex">
 
@@ -42,7 +84,7 @@
             上一页
           </div>
 
-          <div class="blue-btn" @click="goNext">
+          <div class="blue-btn" @click="goNext()">
             点击确认开始
           </div>
           
@@ -85,6 +127,11 @@ import bgColor from '../assets/page2_bg_color.png'
 import bgLeft from '../assets/page2_bg_left_2x.png'
 import bgRight from '../assets/page2_bg_right_2x.png'
 import bgLine from '../assets/page2_bg_horizontal_line.png'
+import p3_title from '../assets/page3_title.svg'
+import c1 from '../assets/page3_c1.png'
+import c2 from '../assets/page3_c2.png'
+import c3 from '../assets/page3_c3.png'
+import c4 from '../assets/page3_c4.png'
 
 export default {
   name: 'Page2',
@@ -101,7 +148,12 @@ export default {
       bgColor,
       bgLeft,
       bgRight,
-      bgLine
+      bgLine,
+      p3_title,
+      c1,
+      c2,
+      c3,
+      c4
     }
   },
   mounted() {
@@ -114,7 +166,7 @@ export default {
   },
   methods: {
     goNext() {
-      this.$router.push('/page3')
+      this.$router.push('/page4')
     },
     goBack() {
       this.$router.push('/')
@@ -205,6 +257,43 @@ export default {
     justify-content: space-between;
 }
 
+.p3-title {
+  width: 140px;
+  display: block;
+  margin: 0 auto;
+}
+
+.card {
+  width: 200px;
+  height: auto;
+  display: block;
+  margin: 0 10px;
+  margin-bottom: -60px;
+  filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.26));
+}
+
+.card.c3 {
+  margin-bottom: -20px;
+}
+
+.card.c4 {
+  width: 180px;
+}
+
+.card-col {
+  margin: 0 auto 0 25px;
+  width: 300px;
+}
+
+.card-col-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  margin: 10px 55px 0 auto;
+  width: 300px;
+}
+
 .content {
     margin: 0;
     width: 100%;
@@ -219,10 +308,7 @@ export default {
   background-size: 100% 1px;
 }
 
-.seg1 {
-    height: 169px;
-    
-}
+
 
 .logo {
     margin-left:30px;
@@ -248,7 +334,7 @@ export default {
 }
 
 .seg3 {
-  height: 186px;
+
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -256,18 +342,16 @@ export default {
 }
 
 .main {
-  max-width:390px;
-  width:80%;
+  width:400px;
   height: auto;
 
-    filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, 0.36));
+  filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, 0.36));
 
 }
 
 .seg4 {
-
-  height: 190px;
-
+  margin-top:-130px;
+  height: 40px;
   justify-content: center;
   padding-top: 20px;
 }
@@ -279,9 +363,9 @@ export default {
 
 
 .arrow{
-    display: relative;
+    position: relative;
     left: -120px;
-    top:-300px;
+    top:-230px;
     width: 124px;
 
 

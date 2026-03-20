@@ -220,7 +220,7 @@ export default {
     },
     
     goBack() {
-      this.$router.push('/page3')
+      this.$router.push('/page2')
     },
     
     blockTap(name) {

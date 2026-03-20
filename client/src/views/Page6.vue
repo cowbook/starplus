@@ -390,25 +390,6 @@ export default {
                 'Satisfied',
                 'Excellent'
               ]
-            },
-            {
-              title:'2.6 配合租户的活动需求响应',
-              value:'',
-              title_en:'Assistance in Tenant Event Requirements',
-              options:[
-                '非常不满意',
-                '不满意',
-                '一般',
-                '满意',
-                '非常满意',
-              ],
-              options_en:[
-                'Poor',
-                'Dissatisfied',
-                'Fair',
-                'Satisfied',
-                'Excellent'
-              ]
             }
           ]
         },
@@ -417,7 +398,7 @@ export default {
           title_en:'Customer Service',
           items:[
             {
-              title:'2.7 信息发布与通知工作',
+              title:'2.6 信息发布与通知工作',
               title_en:'Information Release and Notification',
               value:'',
               options:[
@@ -436,7 +417,7 @@ export default {
               ]
             },
             {
-              title:'2.8 请问您对客户服务有什么其他意见？',
+              title:'2.7 请问您对客户服务有什么其他意见？',
               control:'textarea',
               value:'',
               title_en:'Do you have any other suggestions regarding customer service?'
@@ -643,24 +624,6 @@ export default {
                 'Satisfied',
                 'Excellent'
               ]
-            },{
-              title:'4.3 清洁频率',
-              title_en:'Frequency of Cleaning',
-              value:'',
-              options:[
-                '非常不满意',
-                '不满意',
-                '一般',
-                '满意',
-                '非常满意',
-              ],
-              options_en:[
-                'Poor',
-                'Dissatisfied',
-                'Fair',
-                'Satisfied',
-                'Excellent'
-              ]
             }
           ]
         },'page14':{
@@ -668,7 +631,7 @@ export default {
           title_en:'Cleaning & Maintenance of Public Area & Landscaping',
           items:[
             {
-              title:'4.4 大堂及外墙清洁状况',
+              title:'4.3 大堂及外墙清洁状况',
               title_en:'Main Lobby & Exterior Wall',
               value:'',
               options:[
@@ -686,7 +649,7 @@ export default {
                 'Excellent'
               ]
             },{
-              title:'4.5 公共走廊及楼梯清洁状况',
+              title:'4.4 公共走廊及楼梯清洁状况',
               title_en:'Public Corridors & Stairs',
               value:'',
               options:[
@@ -704,7 +667,7 @@ export default {
                 'Excellent'
               ]
             },{
-              title:'4.6 电梯及扶手电梯清洁状况',
+              title:'4.5 电梯及扶手电梯清洁状况',
               title_en:'Lifts and Escalators',
               value:'',
               options:[
@@ -728,7 +691,7 @@ export default {
           title_en:'Cleaning & Maintenance of Public Area & Landscaping',
           items:[
             {
-              title:'4.7 卫生间清洁状况',
+              title:'4.6 卫生间清洁状况',
               title_en:'Cleanliness of Washroom',
               value:'',
               options:[
@@ -746,7 +709,7 @@ export default {
                 'Excellent'
               ]
             },{
-              title:'4.8 卫生间易耗品补给及时性',
+              title:'4.7 卫生间易耗品补给及时性',
               title_en:'Timely Replenishment of Washroom Supplies',
               value:'',
               options:[
@@ -764,7 +727,7 @@ export default {
                 'Excellent'
               ]
             },{
-              title:'4.9 外围清洁状况',
+              title:'4.8 外围清洁状况',
               title_en:'Cleanliness of External Area',
               value:'',
               options:[
@@ -788,7 +751,7 @@ export default {
           title_en:'Cleaning & Maintenance of Public Area & Landscaping',
           items:[
             {
-              title:'4.10 公区绿植养护',
+              title:'4.9 公区绿植养护',
               title_en:'Landscaping',
               value:'',
               options:[
@@ -806,7 +769,7 @@ export default {
                 'Excellent'
               ]
             },{
-              title:'4.11 请问您对公共区域清洁及绿化有什么其他意见?',
+              title:'4.10 请问您对公共区域清洁及绿化有什么其他意见?',
               title_en:'Any other suggestions regarding Cleaning & Maintenance of Public Area & Landscaping?',
               value:'',
               control:'textarea',
@@ -1239,13 +1202,7 @@ export default {
               control:'textarea'
 
             },{
-              title:'9.2 企业是否需要物管中心提供协助, 以实现ESG目标?',
-              title_en:'Do companies require assistance from property management center to fulfill their ESG obligations?',
-              value:'',
-              control:'textarea'
-
-            },{
-              title:'9.3 对于大厦/商场节能减排工作，您有什么建议？',
+              title:'9.2 对于大厦/商场节能减排工作，您有什么建议？',
               title_en:'Do you have any specific suggestions for energy conservation and emission reduction measures in buildings or shopping malls?',
               value:'',
               control:'textarea'
