@@ -16,8 +16,8 @@
 
             <div style="display:flex; flex-basis:64px;">
 
-                <img class="btn-star" :src="btnStar" alt="星" />
-                <img class="btn-star" :src="btnDown" alt="下" />
+                <img class="btn-star" :src="btnStar" alt="星" @click.stop="openHomeConfirm" />
+                <img class="btn-star" :src="btnDown" alt="下" @click.stop="scrollToBottom" />
 
 
             </div>
@@ -161,6 +161,16 @@
       </div>
     </div>
 
+    <div v-if="showHomeConfirm" class="modal-overlay" @click="closeHomeConfirm">
+      <div class="modal-content" @click.stop>
+        <p>是否回到首页？</p>
+        <div class="modal-actions">
+          <button class="modal-btn" @click="confirmGoHome">是</button>
+          <button class="modal-btn secondary" @click="closeHomeConfirm">否</button>
+        </div>
+      </div>
+    </div>
+
 
 
     <!--
@@ -229,6 +239,7 @@ export default {
         area:''
       },
       showModal: false,
+      showHomeConfirm: false,
       message: ''
     }
   },
@@ -272,6 +283,12 @@ export default {
           })
         )
       );
+    },
+    scrollToBottom() {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: 'smooth'
+      });
     },
 
     goNext() {
@@ -359,6 +376,16 @@ export default {
 
     goBack() {
       this.$router.push('/page4')
+    },
+    openHomeConfirm() {
+      this.showHomeConfirm = true;
+    },
+    closeHomeConfirm() {
+      this.showHomeConfirm = false;
+    },
+    confirmGoHome() {
+      this.showHomeConfirm = false;
+      this.$router.push('/home');
     }
   }
 }
@@ -586,6 +613,7 @@ export default {
     margin-top:30px;
     width: 32px;
     height: auto;
+  cursor: pointer;
 }
 
 
@@ -676,6 +704,21 @@ export default {
 
 .modal-btn:hover {
   background-color: #0099cc;
+}
+
+.modal-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.modal-actions .modal-btn {
+  margin-top: 0;
+}
+
+.modal-btn.secondary {
+  background-color: #8a9aa5;
 }
 
 

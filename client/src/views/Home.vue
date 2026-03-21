@@ -60,7 +60,7 @@ import year from '../assets/page1_year.png'
 import mainText from '../assets/page1_maintext.png'
 import downIcon from '../assets/page1_down.png'
 import card from '../assets/page1_card.png'
-import fold from '../assets/page1_fold.png'
+import fold from '../assets/page1_folder.png'
 import starplus from '../assets/page1_starplus.png'
 import clickicon from '../assets/click.svg'
 

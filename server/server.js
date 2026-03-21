@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
+const crypto = require('crypto');
 const { exec } = require('child_process');
 const { promisify } = require('util');
 require('dotenv').config();
@@ -13,10 +14,14 @@ const PORT = 3000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017';
 const DB_NAME = process.env.MONGODB_DB_NAME || 'starplus';
 const COLLECTION_NAME = 'submissions';
+const ADMIN_COLLECTION_NAME = 'admin_config';
+const ADMIN_DOC_ID = 'admin_credentials';
 const ADMIN_KEY = process.env.ADMIN_KEY || 'change-this-admin-key';
 const execAsync = promisify(exec);
+const ANSWER_OPTIONS = ['非常不满意', '不满意', '一般', '满意', '非常满意'];
 
 let submissionsCollection;
+let adminCollection;
 
 app.set('trust proxy', true);
 app.use(cors());
@@ -53,14 +58,85 @@ function getClientIp(req) {
   return req.ip || req.socket?.remoteAddress || '';
 }
 
-function requireAdmin(req, res, next) {
-  const adminKey = req.headers['x-admin-key'];
+function formatShanghaiDateTime(date = new Date()) {
+  const parts = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'Asia/Shanghai',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  }).formatToParts(date);
 
-  if (!adminKey || adminKey !== ADMIN_KEY) {
-    return res.status(401).json({ error: 'Unauthorized' });
+  const pick = (type) => parts.find((part) => part.type === type)?.value || '00';
+  return `${pick('year')}-${pick('month')}-${pick('day')} ${pick('hour')}:${pick('minute')}:${pick('second')}`;
+}
+
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+  return `${salt}:${hash}`;
+}
+
+function verifyPassword(password, storedHash) {
+  if (!storedHash || typeof storedHash !== 'string' || !storedHash.includes(':')) {
+    return false;
   }
 
-  next();
+  const [salt, originalHash] = storedHash.split(':');
+  const candidate = crypto.scryptSync(password, salt, 64).toString('hex');
+  const originalBuffer = Buffer.from(originalHash, 'hex');
+  const candidateBuffer = Buffer.from(candidate, 'hex');
+
+  if (originalBuffer.length !== candidateBuffer.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(originalBuffer, candidateBuffer);
+}
+
+async function ensureAdminCredentials() {
+  const existing = await adminCollection.findOne({ _id: ADMIN_DOC_ID });
+
+  if (existing?.passwordHash) {
+    return;
+  }
+
+  const passwordHash = hashPassword(ADMIN_KEY);
+  await adminCollection.updateOne(
+    { _id: ADMIN_DOC_ID },
+    {
+      $set: {
+        passwordHash,
+        updatedAt: new Date().toISOString(),
+        seededFromEnv: true
+      }
+    },
+    { upsert: true }
+  );
+}
+
+async function requireAdmin(req, res, next) {
+  try {
+    const adminKey = req.headers['x-admin-key'];
+
+    if (!adminKey || typeof adminKey !== 'string') {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const credential = await adminCollection.findOne({ _id: ADMIN_DOC_ID });
+
+    if (!credential?.passwordHash || !verifyPassword(adminKey, credential.passwordHash)) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    return next();
+  } catch (error) {
+    console.error('Error verifying admin password:', error);
+    return res.status(500).json({ error: 'Failed to verify admin credentials' });
+  }
 }
 
 function normalizeExportValue(value) {
@@ -89,7 +165,7 @@ apiRouter.post('/submit', async (req, res) => {
   try {
     const document = {
       ...normalizeSubmission(submission),
-      createdAt: new Date().toISOString(),
+      createdAt: formatShanghaiDateTime(),
       ip: getClientIp(req)
     };
 
@@ -106,9 +182,27 @@ apiRouter.post('/submit', async (req, res) => {
 
 apiRouter.get('/submissions', requireAdmin, async (req, res) => {
   try {
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const pageSize = Math.max(1, Math.min(100, parseInt(req.query.pageSize, 10) || 10));
+    const property = typeof req.query.property === 'string' ? req.query.property.trim() : '';
+    const skip = (page - 1) * pageSize;
+
+    const filter = {};
+    if (property) {
+      filter.$or = [
+        { '物业': property },
+        { blockName: property }
+      ];
+    }
+
+    const total = await submissionsCollection.countDocuments(filter);
+    const totalPages = Math.ceil(total / pageSize);
+
     const rows = await submissionsCollection
-      .find({})
+      .find(filter)
       .sort({ _id: -1 })
+      .skip(skip)
+      .limit(pageSize)
       .toArray();
 
     const submissions = rows.map((row) => ({
@@ -116,10 +210,188 @@ apiRouter.get('/submissions', requireAdmin, async (req, res) => {
       id: row._id.toString()
     }));
 
-    return res.json(submissions);
+    return res.json({
+      data: submissions,
+      total,
+      page,
+      pageSize,
+      totalPages
+    });
   } catch (err) {
     console.error('Error reading from database:', err);
     return res.status(500).json({ error: 'Failed to read submissions' });
+  }
+});
+
+apiRouter.get('/stats', requireAdmin, async (req, res) => {
+  try {
+    const property = typeof req.query.property === 'string' ? req.query.property.trim() : '';
+    const filter = {};
+
+    if (property) {
+      filter.$or = [
+        { '物业': property },
+        { blockName: property }
+      ];
+    }
+
+    const all = await submissionsCollection.find(filter).toArray();
+    const total = all.length;
+    
+    let dissatisfiedCount = 0;
+    
+    for (const doc of all) {
+      const satisfaction = doc['1.1 整体满意度'] || doc['1.1整体满意度'] || '';
+      if (satisfaction === '不满意' || satisfaction === '非常不满意') {
+        dissatisfiedCount++;
+      }
+    }
+
+    const dissatisfactionRate = total > 0 ? parseFloat(((dissatisfiedCount / total) * 100).toFixed(1)) : 0;
+
+    return res.json({
+      total,
+      dissatisfiedCount,
+      dissatisfactionRate
+    });
+  } catch (err) {
+    console.error('Error calculating stats:', err);
+    return res.status(500).json({ error: 'Failed to calculate stats' });
+  }
+});
+
+apiRouter.get('/analytics', requireAdmin, async (req, res) => {
+  try {
+    const property = typeof req.query.property === 'string' ? req.query.property.trim() : '';
+    const filter = {};
+
+    if (property) {
+      filter.$or = [
+        { '物业': property },
+        { blockName: property }
+      ];
+    }
+
+    const all = await submissionsCollection.find(filter).toArray();
+    const questionMap = new Map();
+
+    const getQuestionOrder = (key) => {
+      const match = String(key).trim().match(/^(\d+)\.(\d+)/);
+      if (!match) {
+        return [Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER];
+      }
+      return [parseInt(match[1], 10), parseInt(match[2], 10)];
+    };
+
+    for (const doc of all) {
+      for (const [key, rawValue] of Object.entries(doc)) {
+        if (!/^(\d+)\.(\d+)/.test(key)) {
+          continue;
+        }
+
+        if (!questionMap.has(key)) {
+          questionMap.set(
+            key,
+            ANSWER_OPTIONS.reduce((acc, option) => {
+              acc[option] = 0;
+              return acc;
+            }, {})
+          );
+        }
+
+        const value = typeof rawValue === 'string' ? rawValue.trim() : rawValue;
+        if (ANSWER_OPTIONS.includes(value)) {
+          questionMap.get(key)[value] += 1;
+        }
+      }
+    }
+
+    const questions = Array.from(questionMap.entries())
+      .sort(([a], [b]) => {
+        const [aMajor, aMinor] = getQuestionOrder(a);
+        const [bMajor, bMinor] = getQuestionOrder(b);
+        if (aMajor !== bMajor) {
+          return aMajor - bMajor;
+        }
+        if (aMinor !== bMinor) {
+          return aMinor - bMinor;
+        }
+        return a.localeCompare(b, 'zh-CN');
+      })
+      .map(([key, counts]) => ({
+        key,
+        label: key,
+        counts,
+        total: ANSWER_OPTIONS.reduce((sum, option) => sum + (counts[option] || 0), 0)
+      }));
+
+    const oneOneQuestion = questions.find((item) => /^1\.1(\s|$)/.test(item.key));
+    const oneOneSource = oneOneQuestion?.counts || ANSWER_OPTIONS.reduce((acc, option) => {
+      acc[option] = 0;
+      return acc;
+    }, {});
+    const oneOneTotal = ANSWER_OPTIONS.reduce((sum, option) => sum + (oneOneSource[option] || 0), 0);
+
+    const oneOne = ANSWER_OPTIONS.map((answer) => {
+      const count = oneOneSource[answer] || 0;
+      const percentage = oneOneTotal > 0 ? parseFloat(((count / oneOneTotal) * 100).toFixed(1)) : 0;
+      return {
+        answer,
+        count,
+        percentage
+      };
+    });
+
+    return res.json({
+      total: all.length,
+      answerOptions: ANSWER_OPTIONS,
+      oneOne,
+      questions
+    });
+  } catch (err) {
+    console.error('Error calculating analytics:', err);
+    return res.status(500).json({ error: 'Failed to calculate analytics' });
+  }
+});
+
+apiRouter.post('/admin/change-password', requireAdmin, async (req, res) => {
+  try {
+    const oldPassword = typeof req.body?.oldPassword === 'string' ? req.body.oldPassword.trim() : '';
+    const newPassword = typeof req.body?.newPassword === 'string' ? req.body.newPassword.trim() : '';
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ error: 'Old password and new password are required' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: 'New password must be at least 6 characters' });
+    }
+
+    const credential = await adminCollection.findOne({ _id: ADMIN_DOC_ID });
+    if (!credential?.passwordHash || !verifyPassword(oldPassword, credential.passwordHash)) {
+      return res.status(400).json({ error: 'Original password is incorrect' });
+    }
+
+    if (oldPassword === newPassword) {
+      return res.status(400).json({ error: 'New password cannot be the same as old password' });
+    }
+
+    await adminCollection.updateOne(
+      { _id: ADMIN_DOC_ID },
+      {
+        $set: {
+          passwordHash: hashPassword(newPassword),
+          updatedAt: new Date().toISOString(),
+          seededFromEnv: false
+        }
+      },
+      { upsert: true }
+    );
+
+    return res.json({ message: 'Password updated successfully' });
+  } catch (error) {
+    console.error('Error changing admin password:', error);
+    return res.status(500).json({ error: 'Failed to change password' });
   }
 });
 
@@ -200,7 +472,7 @@ apiRouter.post('/webhook', (req, res) => {
 });
 
 
-apiRouter.get('/download', async (req, res) => {
+apiRouter.get('/download', requireAdmin, async (req, res) => {
   try {
     const rows = await submissionsCollection
       .find({})
@@ -273,8 +545,10 @@ async function startServer() {
 
     const db = client.db(DB_NAME);
     submissionsCollection = db.collection(COLLECTION_NAME);
+    adminCollection = db.collection(ADMIN_COLLECTION_NAME);
 
     await submissionsCollection.createIndex({ createdAt: -1 });
+    await ensureAdminCredentials();
 
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server running on http://0.0.0.0:${PORT}`);

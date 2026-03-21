@@ -10,8 +10,8 @@
 
           <div style="display: flex; gap: 3px;margin-right:15px;">
 
-              <img class="btn-star" :src="btnStar" alt="星" />
-              <img class="btn-star" :src="btnDown" alt="下" />
+              <img class="btn-star" :src="btnStar" alt="星" @click.stop="openHomeConfirm" />
+              <img class="btn-star" :src="btnDown" alt="下" @click.stop="scrollToBottom" />
 
 
           </div>
@@ -112,6 +112,18 @@
 
 
 
+    <div v-if="showHomeConfirm" class="modal-overlay" @click="closeHomeConfirm">
+      <div class="modal-content" @click.stop>
+        <p>是否回到首页？</p>
+        <div class="modal-actions">
+          <button class="modal-btn" @click="confirmGoHome">是</button>
+          <button class="modal-btn secondary" @click="closeHomeConfirm">否</button>
+        </div>
+      </div>
+    </div>
+
+
+
   </div>
 
   <div v-else class="page4 page4-loading">
@@ -165,7 +177,8 @@ export default {
       bgLeft,
       bgRight,
       bgLine,
-      apiBase: import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:3000`
+      apiBase: import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:3000`,
+      showHomeConfirm: false
     }
   },
   async mounted() {
@@ -216,9 +229,25 @@ export default {
         )
       );
     },
+    scrollToBottom() {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: 'smooth'
+      });
+    },
     
     goBack() {
       this.$router.push('/page2')
+    },
+    openHomeConfirm() {
+      this.showHomeConfirm = true;
+    },
+    closeHomeConfirm() {
+      this.showHomeConfirm = false;
+    },
+    confirmGoHome() {
+      this.showHomeConfirm = false;
+      this.$router.push('/home');
     },
     
     blockTap(name) {
@@ -394,6 +423,52 @@ export default {
     margin-top:30px;
     width: 32px;
     height: auto;
+    cursor: pointer;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 300px;
+  width: calc(100% - 48px);
+  text-align: center;
+  font-family: 'MyHeiTi', yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
+}
+
+.modal-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.modal-btn {
+  padding: 8px 16px;
+  background-color: #00b7eb;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'MyHeiTi', yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
+}
+
+.modal-btn.secondary {
+  background-color: #8a9aa5;
 }
 
 

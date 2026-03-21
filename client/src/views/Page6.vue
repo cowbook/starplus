@@ -11,8 +11,8 @@
 
               <img class="text-top" :src="textTop" alt="顶部文字" />
               <div class="top-group">
-                  <img class="btn-star" :src="btnStar" alt="星" />
-                  <img class="btn-star" :src="btnDown" alt="下" />
+                  <img class="btn-star" :src="btnStar" alt="星" @click.stop="openHomeConfirm" />
+                  <img class="btn-star" :src="btnDown" alt="下" @click.stop="scrollToBottom" />
 
 
               </div>
@@ -176,6 +176,16 @@
           <button class="modal-btn" @click="closePreviewModal">关闭</button>
         </div>
       </div>
+
+      <div v-if="showHomeConfirm" class="modal-overlay" @click="closeHomeConfirm">
+        <div class="modal-content" @click.stop>
+          <p>是否回到首页？</p>
+          <div class="modal-actions">
+            <button class="modal-btn" @click="confirmGoHome">是</button>
+            <button class="modal-btn secondary" @click="closeHomeConfirm">否</button>
+          </div>
+        </div>
+      </div>
     </teleport>
 
 
@@ -251,6 +261,7 @@ export default {
       },
       showModal: false,
       showPreviewModal: false,
+      showHomeConfirm: false,
       message: '',
       modalAction: '',
       previewRows: [],
@@ -1435,11 +1446,30 @@ export default {
       return String(value);
     },
     updateBodyScrollLock() {
-      if (this.showModal || this.showPreviewModal) {
+      if (this.showModal || this.showPreviewModal || this.showHomeConfirm) {
         document.body.style.overflow = 'hidden';
       } else {
         document.body.style.overflow = '';
       }
+    },
+    scrollToBottom() {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: 'smooth'
+      });
+    },
+    openHomeConfirm() {
+      this.showHomeConfirm = true;
+      this.updateBodyScrollLock();
+    },
+    closeHomeConfirm() {
+      this.showHomeConfirm = false;
+      this.updateBodyScrollLock();
+    },
+    confirmGoHome() {
+      this.showHomeConfirm = false;
+      this.updateBodyScrollLock();
+      this.$router.push('/home');
     },
     openModal(msg, action = '') {
       this.message = msg;
@@ -1756,6 +1786,7 @@ export default {
 
     width: 32px;
     height: 32px;
+  cursor: pointer;
 }
 
 
@@ -2148,6 +2179,21 @@ export default {
 
 .modal-btn:hover {
   background-color: #0099cc;
+}
+
+.modal-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.modal-actions .modal-btn {
+  margin-top: 0;
+}
+
+.modal-btn.secondary {
+  background-color: #8a9aa5;
 }
 
 
