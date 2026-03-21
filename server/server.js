@@ -19,6 +19,7 @@ const ADMIN_DOC_ID = 'admin_credentials';
 const ADMIN_KEY = process.env.ADMIN_KEY || 'change-this-admin-key';
 const execAsync = promisify(exec);
 const ANSWER_OPTIONS = ['非常不满意', '不满意', '一般', '满意', '非常满意'];
+let webhookBuildRunning = false;
 
 let submissionsCollection;
 let adminCollection;
@@ -407,66 +408,97 @@ apiRouter.post('/webhook', (req, res) => {
     return text.length > maxLen ? `${text.slice(0, maxLen)}\n...<truncated>` : text;
   };
 
-  const runWebhookPipeline = async () => {
-    const steps = [
-      { name: 'git pull', command: 'git pull --ff-only origin main' },
-      { name: 'client install', command: 'npm --prefix client install --include=dev' },
-      { name: 'client build', command: 'npm --prefix client run build' }
-    ];
+  const runStep = async (step) => {
+    const startedAt = Date.now();
+    const { stdout, stderr } = await execAsync(step.command, {
+      cwd: repoRoot,
+      timeout: 10 * 60 * 1000,
+      maxBuffer: 10 * 1024 * 1024
+    });
 
-    const result = [];
-
-    for (const step of steps) {
-      const startedAt = Date.now();
-
-      try {
-        const { stdout, stderr } = await execAsync(step.command, {
-          cwd: repoRoot,
-          timeout: 10 * 60 * 1000,
-          maxBuffer: 10 * 1024 * 1024
-        });
-
-        result.push({
-          step: step.name,
-          ok: true,
-          durationMs: Date.now() - startedAt,
-          stdout: clipLog(stdout),
-          stderr: clipLog(stderr)
-        });
-      } catch (error) {
-        const failure = {
-          step: step.name,
-          ok: false,
-          durationMs: Date.now() - startedAt,
-          stdout: clipLog(error.stdout),
-          stderr: clipLog(error.stderr),
-          message: error.message
-        };
-
-        result.push(failure);
-        throw { failure, result };
-      }
-    }
-
-    return result;
+    return {
+      step: step.name,
+      ok: true,
+      durationMs: Date.now() - startedAt,
+      stdout: clipLog(stdout),
+      stderr: clipLog(stderr)
+    };
   };
 
-  runWebhookPipeline()
-    .then((steps) => {
-      console.log('[webhook] pull/install/build completed');
+  const runClientBuildInBackground = async () => {
+    if (webhookBuildRunning) {
+      console.log('[webhook] background build already running, skip duplicate trigger');
+      return;
+    }
+
+    webhookBuildRunning = true;
+
+    const backgroundSteps = [
+      { name: 'client install', command: 'npm --prefix client install --include=dev' },
+      { name: 'client build', command: 'npm --prefix client run build' },
+      { name: 'restart service', command: 'sudo systemctl restart starplus' }
+    ];
+
+    try {
+      for (const step of backgroundSteps) {
+        const result = await runStep(step);
+        console.log(`[webhook] ${step.name} completed in ${result.durationMs}ms`);
+        if (result.stdout) {
+          console.log(`[webhook] ${step.name} stdout:\n${result.stdout}`);
+        }
+        if (result.stderr) {
+          console.log(`[webhook] ${step.name} stderr:\n${result.stderr}`);
+        }
+      }
+      console.log('[webhook] background client install/build completed');
+    } catch (error) {
+      console.error('[webhook] background client pipeline failed:', {
+        step: error?.cmd,
+        message: error?.message,
+        stdout: clipLog(error?.stdout),
+        stderr: clipLog(error?.stderr)
+      });
+    } finally {
+      webhookBuildRunning = false;
+    }
+  };
+
+  runStep({ name: 'git pull', command: 'git pull --ff-only origin main' })
+    .then((gitPullResult) => {
+      const buildSkipped = webhookBuildRunning;
+
+      if (!webhookBuildRunning) {
+        runClientBuildInBackground();
+      }
+
       return res.json({
-        message: 'Webhook succeeded: code pulled and client built',
-        steps
+        message: buildSkipped
+          ? 'Webhook succeeded: git pull completed, background build already running'
+          : 'Webhook succeeded: git pull completed, background build started',
+        step: gitPullResult,
+        background: {
+          running: true,
+          started: !buildSkipped,
+          skipped: buildSkipped
+        }
       });
     })
     .catch((error) => {
-      const failure = error.failure || { step: 'unknown', message: 'Unknown webhook error' };
-      console.error('[webhook] pipeline failed:', failure);
+      console.error('[webhook] git pull failed:', {
+        message: error?.message,
+        stdout: clipLog(error?.stdout),
+        stderr: clipLog(error?.stderr)
+      });
+
       return res.status(500).json({
-        error: 'Webhook pipeline failed',
-        failedStep: failure.step,
-        message: failure.message,
-        steps: error.result || []
+        error: 'Webhook git pull failed',
+        message: error?.message || 'Unknown webhook error',
+        step: {
+          step: 'git pull',
+          ok: false,
+          stdout: clipLog(error?.stdout),
+          stderr: clipLog(error?.stderr)
+        }
       });
     });
 });
