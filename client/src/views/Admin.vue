@@ -422,6 +422,11 @@ export default {
     }
   },
   methods: {
+    buildApiUrl(endpoint) {
+      const base = this.apiBase.endsWith('/') ? this.apiBase.slice(0, -1) : this.apiBase
+      const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`
+      return new URL(`${base}${path}`, window.location.origin)
+    },
     setActiveView(view) {
       this.activeView = view
       this.closeMobileMenu()
@@ -448,7 +453,7 @@ export default {
       this.currentPage = targetPage
 
       try {
-        const url = new URL(`${this.apiBase}/submissions`)
+        const url = this.buildApiUrl('/submissions')
         url.searchParams.set('page', targetPage)
         url.searchParams.set('pageSize', this.pageSize)
         if (this.selectedProperty) {
@@ -498,7 +503,7 @@ export default {
       this.errorMessage = ''
 
       try {
-        const url = new URL(`${this.apiBase}/analytics`)
+        const url = this.buildApiUrl('/analytics')
         if (this.selectedProperty) {
           url.searchParams.set('property', this.selectedProperty)
         }
@@ -539,7 +544,7 @@ export default {
       }
 
       try {
-        const url = new URL(`${this.apiBase}/stats`)
+        const url = this.buildApiUrl('/stats')
         if (this.selectedProperty) {
           url.searchParams.set('property', this.selectedProperty)
         }
