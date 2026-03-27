@@ -393,10 +393,7 @@ export default {
 
 <style scoped>
 
-@font-face {
-  font-family: 'MyHeiTi';
-  src: url('../assets/myheiti.woff2') format('woff2');
-}
+
 
 
 

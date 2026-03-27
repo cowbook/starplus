@@ -1591,17 +1591,6 @@ export default {
 
 
 
-@font-face {
-  font-family: 'MyHeiTi';
-  src: url('../assets/myheiti.woff2') format('woff2');
-}
-
-@font-face {
-  font-family: 'mi';
-  src: url('../assets/misans.woff2') format('woff2');
-}
-
-
 .item-textarea{
   margin:20px 15px 0 15px;
   width:100%;
