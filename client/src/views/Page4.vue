@@ -1,7 +1,7 @@
 <template>
   <div v-if="assetsReady" class="page4 appear-container">
 
-    <header class="segment seg1 appear-item" data-delay="0.1">
+    <header class="segment seg1 appear-item bottom-line" data-delay="0.1">
 
       <div class="row">
 
@@ -387,10 +387,12 @@ export default {
 .segment {
 
   width: 100%;
+
+  /* ver-no-line 背景图方案：三层背景图，左固定、中重复、右固定
   background-position: bottom center;
   background-repeat: no-repeat;
   background-image: url('../assets/page2_bg_horizontal_line.png');
-  background-size: 100% 1px;
+  background-size: 100% 1px;*/
 }
 
 .seg2{
@@ -407,7 +409,7 @@ export default {
 
 .logo {
   position: relative;
-    margin-left:30px;
+    margin-left:20px;
     width: 160px;
     height: auto;
 }

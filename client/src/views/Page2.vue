@@ -6,7 +6,7 @@
 
     <div class="content">
 
-      <div class="segment seg1 appear-item" data-delay="0.1">
+      <div class="segment seg1 appear-item bottom-line" data-delay="0.1">
 
         <div class="row">
             <img class="logo" :src="logo" alt="STARPLUS" />
@@ -35,7 +35,8 @@
 
     <main class="content">
 
-      <div class="segment" style="padding-bottom: 20px;">
+      <div class="segment bottom-line" style="height:290px;">
+        
         <div class="row">
 
 
@@ -51,8 +52,16 @@
 
         </div>
 
+      </div>
 
-        <div class="row" style="box-sizing: border-box; padding:0 60px 0 30px;margin-top:-70px;display:flex;flex-wrap:nowrap;justify-content:space-between;">
+
+   
+
+
+      <div class="segment bottom-line">
+
+
+        <div class="row" style="box-sizing: border-box; padding:20px 60px 70px 30px;display:flex;flex-wrap:nowrap;justify-content:space-between;">
 
           <div style="margin-right:40px;">
             <div class="blue-btn" @click.stop="goBack()" style="z-index:100;position:relative;left:27px;">
@@ -67,12 +76,8 @@
           </div>
         </div>
 
-
-
-
-              
-
       </div>
+
 
    
 
@@ -86,7 +91,7 @@
       <div class="segment seg5 appear-item" data-delay="0.4" >
 
 
-                <img class="footer-text" :src="footerText" alt="底部文字" />
+                <img style="position: relative; top:-30px" class="footer-text" :src="footerText" alt="底部文字" />
 
 
       </div>
@@ -223,37 +228,42 @@ export default {
 
   /* 从上到下（第一层在最上面） */
   background-image:
-
-    url("../assets/page2_bg_left_2x.png"),      /* 左边固定 */
+    /* ver-no-line 背景图方案：三层背景图，左固定、中重复、右固定 
+    url("../assets/page2_bg_left_2x.png"),      
+    */
     url("../assets/page2_bg_color.png"),   /* 中间可重复 */
-    url("../assets/page2_bg_right_2x.png");     /* 右边固定 */
 
+    url("../assets/page2_bg_right_2x_noline.png");   /* 中间可重复 */
+
+
+    /* ver-no-line 背景图方案：三层背景图，左固定、中重复、右固定
+    url("../assets/page2_bg_right_2x.png");    
+    */
 
   background-repeat:
-    no-repeat,            /* 左不重复 */
+    /* ver-no-line 背景图方案：三层背景图，左固定、中重复、右固定 
+    no-repeat,       */
     no-repeat,            /* 左不重复 */
     repeat-y;            /* 右不重复 */
 
   background-position:
-    left top,             /* 左上角对齐 */
-    center top,             /* 中间从左开始铺（也可以 center top）*/
+    /* ver-no-line 背景图方案：三层背景图，左固定、中重复、右固定
+    left top,           */
+    left top,             /* 中间从左开始铺（也可以 center top）*/
     right top;            /* 右上角对齐 */
 
   /* 可选：如果图片高度不同，可以统一高度 */
   background-size:
-    39px 1078px,            /* 左：高度撑满，宽度自动 */
+  /* ver-no-line 背景图方案：三层背景图，左固定、中重复、右固定
+    39px 1078px,  
+  */
     calc(100vw - 290px) 1078px,            /* 中：高度撑满，宽度自动重复 */
-    54px 808px;
+    40px 808px;
   
 
 
   /* 建议加一个兜底颜色，防止图片加载慢或透明 */
   background-color: #f6f7f1;
-
-
-
-
-
 
 }
 
@@ -363,17 +373,20 @@ export default {
 .segment {
 
   width: 100%;
+
+  /* ver-no-line 背景图方案：三层背景图，左固定、中重复、右固定
   background-position: bottom center;
   background-repeat: no-repeat;
   background-image: url('../assets/page2_bg_horizontal_line.png');
   background-size: 100% 1px;
+  */
 }
 
 
 
 .logo {
-    margin-left:30px;
-    width: 160px;
+    margin-left:20px;
+    width: 190px;
     height: auto;
 }
 

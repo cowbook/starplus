@@ -7,9 +7,9 @@
     <div class="content">
 
 
-      <div class="segment appear-item" data-delay="0.1">
+      <div class="segment appear-item bottom-line" data-delay="0.1">
 
-        <div class="row">
+        <div class="row" style="padding-left:25px;">
 
             <img class="logo" :src="logo" alt="STARPLUS" />
             <img class="text-top" :src="textTop" alt="顶部文字" />
@@ -39,7 +39,7 @@
         </div>
       </div>
 
-      <div class="segment appear-item" data-delay="0.3">
+      <div class="segment appear-item bottom-line" data-delay="0.3">
 
         <div class="form">
 
@@ -434,26 +434,23 @@ export default {
   /* 从上到下（第一层在最上面） */
   background-image:
 
-    url("../assets/page2_bg_left_2x.png"),      /* 左边固定 */
+    /*  url("../assets/page2_bg_left_2x.png"), 左边固定 */
     url("../assets/page2_bg_color.png"),   /* 中间可重复 */
-    url("../assets/page2_bg_right_2x.png");     /* 右边固定 */
+    url("../assets/page2_bg_right_2x_noline.png");     /* 右边固定 */
 
 
   background-repeat:
-    no-repeat,            /* 左不重复 */
     no-repeat,            /* 左不重复 */
     repeat-y;            /* 右不重复 */
 
   background-position:
     left top,             /* 左上角对齐 */
-    center top,             /* 中间从左开始铺（也可以 center top）*/
     right top;            /* 右上角对齐 */
 
   /* 可选：如果图片高度不同，可以统一高度 */
   background-size:
-    39px 1078px,            /* 左：高度撑满，宽度自动 */
     calc(100vw - 290px) 1078px,            /* 中：高度撑满，宽度自动重复 */
-    54px 808px;
+    42px 808px;
   
 
 
@@ -590,17 +587,19 @@ export default {
 
 .segment {
   width: 100%;
+
+  /* ver-no-line 背景图方案：三层背景图，左固定、中重复、右固定
   background-position: bottom center;
   background-repeat: no-repeat;
   background-image: url('../assets/page2_bg_horizontal_line.png');
   background-size: 100% 1px;
-  padding-bottom: 20px;
+  padding-bottom: 20px;*/
 }
 
 
 
 .logo {
-    width: 140px;
+    width: 160px;
     height: auto;
 }
 

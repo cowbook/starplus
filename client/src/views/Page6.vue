@@ -1,9 +1,9 @@
 <template>
     <div v-if="assetsReady" class="page6 appear-container">
 
-      <header class="segment appear-item" data-delay="0.1">
+      <header class="segment appear-item bottom-line" data-delay="0.1">
 
-        <div class="row">
+        <div class="row" style="padding-left:10px;">
 
             <img class="logo" :src="logo" alt="STARPLUS" />
 
@@ -114,6 +114,7 @@
 
 
       <div class="segment" v-if = "currentPage == 25">
+
         <div class="row">
 
           <div class="blue-btn" @click="p6_goNext(-1)">
@@ -128,11 +129,11 @@
                 预览
           </div>
 
-        
         </div>
+
       </div>
 
-      <div class="segment" v-else>
+      <div class="segment top-line" v-else>
         <div class="row" style="min-width:350px;">
 
           <div class="blue-btn-l" @click="p6_goNext(-1)">
@@ -1826,26 +1827,22 @@ export default {
   /* 从上到下（第一层在最上面） */
   background-image:
 
-    url("../assets/page2_bg_left_2x.png"),      /* 左边固定 */
     url("../assets/page2_bg_color.png"),   /* 中间可重复 */
-    url("../assets/page2_bg_right_2x.png");     /* 右边固定 */
+    url("../assets/page2_bg_right_2x_noline.png");     /* 右边固定 */
 
 
   background-repeat:
-    repeat-y,            /* 右不重复 */
     no-repeat,            /* 左不重复 */
     repeat-y;            /* 右不重复 */
 
   background-position:
     left top,             /* 左上角对齐 */
-    center top,             /* 中间从左开始铺（也可以 center top）*/
     right top;            /* 右上角对齐 */
 
   /* 可选：如果图片高度不同，可以统一高度 */
   background-size:
-    39px 1078px,            /* 左：高度撑满，宽度自动 */
     calc(100vw - 290px) 1078px,            /* 中：高度撑满，宽度自动重复 */
-    54px 808px;
+    42px 808px;
   
 
 
@@ -1988,11 +1985,7 @@ export default {
 
 .segment {
   width: 100%;
-  background-position: bottom center;
-  background-repeat: no-repeat;
-  background-image: url('../assets/page2_bg_horizontal_line.png');
-  background-size: 100% 1px;
-  padding-bottom: 10px;
+  
 }
 
 

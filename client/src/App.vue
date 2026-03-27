@@ -62,6 +62,23 @@ export default {
   font-display: swap;
 }
 
+.bottom-line{
+
+  background-position: bottom center;
+  background-repeat: no-repeat;
+  background-image: url('./assets/page2_bg_horizontal_line.png');
+  background-size: 100% 1px;
+  padding-bottom: 10px;
+}
+
+.top-line{
+
+  background-position: top center;
+  background-repeat: no-repeat;
+  background-image: url('./assets/page2_bg_horizontal_line.png');
+  background-size: 100% 1px;
+  padding-top: 2px;
+}
 
 html {
     height: 100%;

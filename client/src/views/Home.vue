@@ -6,7 +6,7 @@
 
     <header class="hero appear-item" data-delay="0.1">
 
-      <div class="hero-top bg-line">
+      <div class="hero-top bottom-line">
 
         <div class="row">
           <img class="logo" :src="logo" alt="STARPLUS Logo" />
@@ -35,7 +35,7 @@
       </div>
     </header>
 
-    <main class="content bg-line appear-item" data-delay="0.25">
+    <main class="content bottom-line appear-item" data-delay="0.25">
 
       <div class="row">
         <div style="margin:0 auto;">
@@ -163,9 +163,11 @@ export default {
   height: 100%;
   width: 100%;
 
+  /* ver-no-line 背景图方案：三层背景图，左固定、中重复、右固定
   background-image: url('../assets/page1_bg_left.png');
   background-position: left top;
   background-repeat: repeat-y;
+  */
 
   /*
   background-position: left top;
@@ -175,14 +177,15 @@ export default {
   cursor: pointer;
 }
 
+/* ver-no-line 背景图方案：三层背景图，左固定、中重复、右固定
 .bg-line {
-
   background-position: bottom center;
   background-repeat: no-repeat;
   background-image: url('../assets/page2_bg_horizontal_line.png');
   background-size: 100% 1px;
+  
 }
-
+*/
 
 .page {
   

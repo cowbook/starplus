@@ -1,9 +1,9 @@
 <template>
   <div class="page26 appear-container">
 
-    <header class="segment seg1 appear-item" data-delay="0.1">
+    <header class="segment bottom-line seg1 appear-item" data-delay="0.1">
 
-      <div class="row">
+      <div class="row" style="justify-content: flex-start;">
           <img class="logo" :src="logo" alt="STARPLUS" />
           <img class="text-top" :src="textTop" alt="顶部文字" />
 
@@ -87,9 +87,11 @@
       
         <div style="text-align: center; font-size: 12px;">
 
+          <span style="color:#886e49;">
           退出问卷请按左上角✕按钮关闭
+          </span>
 
-          <div class="blue-btn" style="margin-top:0px" @click="reset()">
+          <div class="blue-btn" style="margin-top:15px" @click="reset()">
                 重新填写
           </div>
 
@@ -230,26 +232,22 @@ export default {
   /* 从上到下（第一层在最上面） */
   background-image:
 
-    url("../assets/page2_bg_left_2x.png"),      /* 左边固定 */
     url("../assets/page2_bg_color.png"),   /* 中间可重复 */
-    url("../assets/page2_bg_right_2x.png");     /* 右边固定 */
+    url("../assets/page2_bg_right_2x_noline.png");     /* 右边固定 */
 
 
   background-repeat:
-    repeat-y,            /* 右不重复 */
     no-repeat,            /* 左不重复 */
     repeat-y;            /* 右不重复 */
 
   background-position:
     left top,             /* 左上角对齐 */
-    center top,             /* 中间从左开始铺（也可以 center top）*/
     right top;            /* 右上角对齐 */
 
   /* 可选：如果图片高度不同，可以统一高度 */
   background-size:
-    39px 1078px,            /* 左：高度撑满，宽度自动 */
     calc(100vw - 290px) 1078px,            /* 中：高度撑满，宽度自动重复 */
-    54px 808px;
+    42px 808px;
   
 
 
@@ -277,8 +275,8 @@ export default {
   font-size:13px;
   font-weight: 800;
   margin-bottom: 12px;
-  margin-left:35px;
-  padding-left: 12px;
+  margin-left:0px;
+  padding-left: 42px;
   padding-right: 12px;
   line-height: 1;
 
@@ -350,10 +348,7 @@ export default {
 .segment {
 
   width: 100%;
-  background-position: bottom center;
-  background-repeat: no-repeat;
-  background-image: url('../assets/page2_bg_horizontal_line.png');
-  background-size: 100% 1px;
+  
 }
 
 .seg2{
@@ -364,6 +359,8 @@ export default {
 
 
 .blue-btn {
+
+
   margin: 30px auto;
   width: 140px;
   height: 55px;
@@ -372,17 +369,19 @@ export default {
   background-repeat: no-repeat;
   background-size: 140px auto;
   color: white;
-
   font-size: 14px;
   font-weight: bold;
   font-family: 'MyHeiTi', yahei, Microsoft YaHei, Helvetica, Arial, sans-serif;
   text-align: center;
   cursor: pointer;
-
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
-
   letter-spacing: 2px;
+
+
 }
+
+
+
 .item{
   margin:0 10px;
   display: block;
@@ -390,11 +389,16 @@ export default {
   max-width:450px;
 }
 
+
+
+
 .logo {
-    margin-left:30px;
-    width: 240px;
+    margin-left:10px;
+    width: 220px;
     height: auto;
 }
+
+
 
 .text-top {
   width: 120px;
