@@ -1560,6 +1560,7 @@ export default {
     async submitForm() {
 
       const formattedData = this.formatData();
+      const formStore = useFormStore();
 
       try {
         const response = await fetch(`${this.apiBase}/submit`, {
@@ -1570,7 +1571,7 @@ export default {
           body: JSON.stringify(formattedData)
         })
         if (response.ok) {
-          localStorage.removeItem('form-temp-data');
+          formStore.clearFormData();
           this.openModal('提交成功！', 'goPage26');
 
         } else {
