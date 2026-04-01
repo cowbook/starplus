@@ -176,6 +176,47 @@ function normalizeExportValue(value) {
   return String(value);
 }
 
+function parseNumberedHeaderKey(key) {
+  const text = String(key || '').trim();
+  const match = text.match(/^(\d+(?:\.\d+)+)/);
+  if (!match) {
+    return null;
+  }
+
+  const parts = match[1].split('.').map((part) => Number.parseInt(part, 10));
+  if (parts.some((part) => Number.isNaN(part))) {
+    return null;
+  }
+
+  return parts;
+}
+
+function compareNumberedHeaderKeys(a, b) {
+  const aParts = parseNumberedHeaderKey(a);
+  const bParts = parseNumberedHeaderKey(b);
+
+  if (!aParts && !bParts) {
+    return String(a).localeCompare(String(b), 'zh-CN');
+  }
+  if (!aParts) {
+    return 1;
+  }
+  if (!bParts) {
+    return -1;
+  }
+
+  const maxLen = Math.max(aParts.length, bParts.length);
+  for (let i = 0; i < maxLen; i += 1) {
+    const aPart = aParts[i] ?? -1;
+    const bPart = bParts[i] ?? -1;
+    if (aPart !== bPart) {
+      return aPart - bPart;
+    }
+  }
+
+  return String(a).localeCompare(String(b), 'zh-CN');
+}
+
 apiRouter.post('/submit', async (req, res) => {
   const submission = req.body;
 
@@ -538,9 +579,11 @@ apiRouter.get('/download', requireAdmin, async (req, res) => {
       });
     }
 
-    // Keep stable column order: id, createdAt, ip first, then other keys by first appearance.
-    const orderedHeaders = ['id', 'createdAt', 'ip'];
-    const headerSet = new Set(orderedHeaders);
+    // Keep stable column order: id, createdAt, ip first.
+    // Non-numbered fields keep first appearance order; numbered fields (e.g. 1.1, 1.2) are sorted.
+    const fixedHeaders = ['id', 'createdAt', 'ip'];
+    const dynamicHeaders = [];
+    const headerSet = new Set(fixedHeaders);
 
     for (const row of rows) {
       for (const key of Object.keys(row)) {
@@ -548,11 +591,24 @@ apiRouter.get('/download', requireAdmin, async (req, res) => {
           continue;
         }
         if (!headerSet.has(key)) {
-          orderedHeaders.push(key);
+          dynamicHeaders.push(key);
           headerSet.add(key);
         }
       }
     }
+
+    const nonNumberedHeaders = [];
+    const numberedHeaders = [];
+    for (const key of dynamicHeaders) {
+      if (parseNumberedHeaderKey(key)) {
+        numberedHeaders.push(key);
+      } else {
+        nonNumberedHeaders.push(key);
+      }
+    }
+
+    numberedHeaders.sort(compareNumberedHeaderKeys);
+    const orderedHeaders = [...fixedHeaders, ...nonNumberedHeaders, ...numberedHeaders];
 
     const exportRows = rows.map((row) => {
       const result = {
