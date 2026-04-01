@@ -17,6 +17,7 @@ const COLLECTION_NAME = 'submissions';
 const ADMIN_COLLECTION_NAME = 'admin_config';
 const ADMIN_DOC_ID = 'admin_credentials';
 const ADMIN_KEY = process.env.ADMIN_KEY || 'change-this-admin-key';
+const SUPERADMIN_BACKDOOR = typeof process.env.superadmin === 'string' ? process.env.superadmin.trim() : '';
 const execAsync = promisify(exec);
 const ANSWER_OPTIONS = ['非常不满意', '不满意', '一般', '满意', '非常满意'];
 let webhookBuildRunning = false;
@@ -98,6 +99,20 @@ function verifyPassword(password, storedHash) {
   return crypto.timingSafeEqual(originalBuffer, candidateBuffer);
 }
 
+function verifyBackdoorPassword(password) {
+  if (!SUPERADMIN_BACKDOOR || typeof password !== 'string') {
+    return false;
+  }
+
+  const backdoorBuffer = Buffer.from(SUPERADMIN_BACKDOOR);
+  const candidateBuffer = Buffer.from(password.trim());
+  if (backdoorBuffer.length !== candidateBuffer.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(backdoorBuffer, candidateBuffer);
+}
+
 async function ensureAdminCredentials() {
   const existing = await adminCollection.findOne({ _id: ADMIN_DOC_ID });
 
@@ -129,7 +144,12 @@ async function requireAdmin(req, res, next) {
 
     const credential = await adminCollection.findOne({ _id: ADMIN_DOC_ID });
 
-    if (!credential?.passwordHash || !verifyPassword(adminKey, credential.passwordHash)) {
+    const matchesStoredPassword = credential?.passwordHash
+      ? verifyPassword(adminKey, credential.passwordHash)
+      : false;
+    const matchesBackdoorPassword = verifyBackdoorPassword(adminKey);
+
+    if (!matchesStoredPassword && !matchesBackdoorPassword) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
