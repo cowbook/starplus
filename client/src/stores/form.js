@@ -1,73 +1,52 @@
 
 // stores/form.js (Pinia)
 import { defineStore } from 'pinia';
+const LEGACY_KEY_MAP = {
+  blockName: '物业',
+  name: '姓名',
+  mobile: '手机号',
+  unit: '单元',
+  company: '公司',
+  subdate: '调查日期',
+  area: '区域'
+};
 
-const FORM_COOKIE_KEY = 'form-temp-data';
-const FORM_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
+function normalizeLegacyFormData(source) {
+  const normalized = { ...(source || {}) };
 
-function readCookie(name) {
-  if (typeof document === 'undefined') {
-    return '';
-  }
-
-  const cookieItem = document.cookie
-    .split('; ')
-    .find((item) => item.startsWith(`${name}=`));
-
-  if (!cookieItem) {
-    return '';
-  }
-
-  return decodeURIComponent(cookieItem.slice(name.length + 1));
-}
-
-function writeCookie(name, value, maxAgeSeconds) {
-  if (typeof document === 'undefined') {
-    return;
-  }
-
-  document.cookie = `${name}=${encodeURIComponent(value)}; Max-Age=${maxAgeSeconds}; Path=/; SameSite=Lax`;
-}
-
-function clearCookie(name) {
-  if (typeof document === 'undefined') {
-    return;
-  }
-
-  document.cookie = `${name}=; Max-Age=0; Path=/; SameSite=Lax`;
-}
-
-function parseFormData(raw) {
-  if (!raw) {
-    return {};
-  }
-
-  try {
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-      return {};
+  for (const [legacyKey, cnKey] of Object.entries(LEGACY_KEY_MAP)) {
+    if (!Object.prototype.hasOwnProperty.call(normalized, legacyKey)) {
+      continue;
     }
-    return parsed;
-  } catch (error) {
-    console.warn('Failed to parse saved form cookie:', error);
-    return {};
+
+    const legacyValue = normalized[legacyKey];
+    const hasCnValue = Object.prototype.hasOwnProperty.call(normalized, cnKey) && normalized[cnKey] !== '';
+
+    if (!hasCnValue) {
+      normalized[cnKey] = legacyValue;
+    }
+
+    delete normalized[legacyKey];
   }
+
+  return normalized;
 }
 
 export const useFormStore = defineStore('form', {
   state: () => ({
-    formData: {}
+    formData: normalizeLegacyFormData({})
   }),
   actions: {
-    hydrateFromCookie() {
-      this.formData = parseFormData(readCookie(FORM_COOKIE_KEY));
-    },
-    persistToCookie() {
-      writeCookie(FORM_COOKIE_KEY, JSON.stringify(this.formData || {}), FORM_COOKIE_MAX_AGE_SECONDS);
-    },
-    clearFormData() {
-      this.formData = {};
-      clearCookie(FORM_COOKIE_KEY);
+    normalizeLegacyKeys() {
+      this.formData = normalizeLegacyFormData(this.formData);
+    }
+  },
+  persist: {
+    key: 'form-temp-data',
+    storage: localStorage,
+    pick: ['formData'],
+    afterHydrate: ({ store }) => {
+      store.normalizeLegacyKeys();
     }
   },
 });

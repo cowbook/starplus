@@ -163,6 +163,12 @@ import p8 from '../assets/b8.png'
 export default {
   name: 'Page4',
   data() {
+    const hostname = window.location.hostname;
+    const isLocalHost =
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      /^\d+\.\d+\.\d+\.\d+$/.test(hostname);
+
     return {
       assetsReady: false,
       choice: "恒汇国际大厦",
@@ -177,8 +183,13 @@ export default {
       bgLeft,
       bgRight,
       bgLine,
-      apiBase: import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:3000`,
-      showHomeConfirm: false
+      apiBase:
+        import.meta.env.VITE_API_URL ||
+        (isLocalHost
+          ? `${window.location.protocol}//${hostname}:3000/api`
+          : '/api'),
+      showHomeConfirm: false,
+      submitting: false
     }
   },
   async mounted() {
@@ -194,7 +205,7 @@ export default {
     const formStore = useFormStore();
 
     // 从 store 获取数据并设置到本地 choice
-    this.choice = formStore.formData?.blockName || '';
+    this.choice = formStore.formData?formStore.formData['物业']:'';
   },
   methods: {
     preloadPageImages() {
@@ -237,6 +248,9 @@ export default {
     },
     
     goBack() {
+
+
+
       this.$router.push('/page2')
     },
     openHomeConfirm() {
@@ -250,22 +264,57 @@ export default {
       this.$router.push('/home');
     },
     
-    blockTap(name) {
+    async blockTap(name) {
+
+       if (this.submitting) {
+         return;
+       }
 
        this.choice = name;
 
        const formStore = useFormStore();
-       formStore.formData = { ...formStore.formData,  blockName: name };
+       formStore.formData = { ...formStore.formData,  '物业': name };
 
        console.log("选择了", formStore.formData);
-       //this.submitForm();
+       this.submitting = true;
 
-       setTimeout(() => {
+       try {
+         const response = await fetch(`${this.apiBase}/submit`, {
+           method: 'POST',
+           headers: {
+             'Content-Type': 'application/json'
+           },
+           body: JSON.stringify(formStore.formData)
+         });
 
-          this.$router.push('/page5');
+         if (!response.ok) {
+           const errText = await response.text();
+           alert(`提交失败(${response.status})：${errText || '请稍后重试'}`);
+           this.submitting = false;
+           return;
+         }
 
-       }, 700);
+         const result = await response.json();
+         const savedId = result?.id || result?.data?.id || '';
+         formStore.formData = {
+           ...formStore.formData,
+           submissionId: savedId
+         };
 
+         setTimeout(() => {
+           this.$router.push({
+             path: '/page5',
+             query: savedId ? { id: savedId } : {}
+           });
+         }, 700);
+       } catch (error) {
+         console.error('Error:', error);
+         alert(`提交失败，请检查网络或稍后再试\n${error?.message || ''}`);
+         this.submitting = false;
+         return;
+       }
+
+       this.submitting = false;
 
     }
   }

@@ -212,8 +212,13 @@ import bgLine from '../assets/page2_bg_horizontal_line.png'
 
 
 export default {
-  name: 'Page2',
+  name: 'Page5',
   data() {
+    const hostname = window.location.hostname;
+    const isLocalHost =
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      /^\d+\.\d+\.\d+\.\d+$/.test(hostname);
     const now = new Date();
     const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
@@ -229,6 +234,11 @@ export default {
       bgLeft,
       bgRight,
       bgLine,
+      apiBase:
+        import.meta.env.VITE_API_URL ||
+        (isLocalHost
+          ? `${window.location.protocol}//${hostname}:3000/api`
+          : '/api'),
       form: {
         blockName:'',
         name: '',
@@ -240,7 +250,8 @@ export default {
       },
       showModal: false,
       showHomeConfirm: false,
-      message: ''
+      message: '',
+      submitting: false
     }
   },
   async mounted() {
@@ -254,11 +265,58 @@ export default {
     });
 
     const formStore = useFormStore();
+    const routeId = typeof this.$route?.query?.id === 'string' ? this.$route.query.id.trim() : '';
 
-    // 从 store 获取数据并设置到本地 form
-    this.form = { ...this.form, ...formStore.formData };
+    if (routeId) {
+      
+      formStore.formData = {
+        ...formStore.formData,
+        submissionId: routeId
+      };
+      this.form.blockName = formStore.formData['物业'] || '';
+      this.form.name = formStore.formData['姓名'] || '';
+      this.form.mobile = formStore.formData['手机号'] || '';
+      this.form.unit = formStore.formData['单元'] || '';
+      this.form.company = formStore.formData['公司'] || '';
+      if(formStore.formData['调查日期'])
+        this.form.subdate = formStore.formData['调查日期'];
+      this.form.area = formStore.formData['区域'] || '';
+    }
+
   },
   methods: {
+    getSubmissionId() {
+      const routeId = typeof this.$route?.query?.id === 'string' ? this.$route.query.id.trim() : '';
+      const formStore = useFormStore();
+      const storeId = typeof formStore.formData?.submissionId === 'string' ? formStore.formData.submissionId.trim() : '';
+      return routeId || storeId;
+    },
+    syncBasicInfoToStore(trimmedForm) {
+      const formStore = useFormStore();
+      const {
+        blockName,
+        name,
+        mobile,
+        unit,
+        company,
+        subdate,
+        area,
+        ...rest
+      } = formStore.formData || {};
+
+      formStore.formData = {
+        ...rest,
+        ...(trimmedForm.blockName ? { '物业': trimmedForm.blockName } : {}),
+        '姓名': trimmedForm.name,
+        '手机号': trimmedForm.mobile,
+        '单元': trimmedForm.unit,
+        '公司': trimmedForm.company,
+        '调查日期': trimmedForm.subdate,
+        '区域': trimmedForm.area
+      };
+
+      return formStore;
+    },
     preloadPageImages() {
       const imageUrls = [
         this.logo,
@@ -291,17 +349,21 @@ export default {
       });
     },
 
-    goNext() {
+    async goNext() {
+      if (this.submitting) {
+        return;
+      }
       
-      const { name, mobile, unit, company, subdate } = this.form;
+      const { name, mobile, unit, company, subdate, area } = this.form;
 
       const trimmedName = (name || '').trim();
       const trimmedMobile = (mobile || '').trim();
       const trimmedUnit = (unit || '').trim();
       const trimmedCompany = (company || '').trim();
       const trimmedSubdate = (subdate || '').trim();
+      const trimmedArea = (area || '').trim();
 
-      if (!trimmedName || !trimmedMobile || !trimmedUnit || !trimmedCompany || !trimmedSubdate) {
+      if (!trimmedName || !trimmedMobile || !trimmedUnit || !trimmedCompany || !trimmedSubdate || !trimmedArea) {
         this.showModal = true;
         this.message = '请填写完整信息!';
         return;
@@ -329,6 +391,12 @@ export default {
         return;
       }
 
+      if (!trimmedArea) {
+        this.showModal = true;
+        this.message = '请输入区域信息';
+        return;
+      }
+
       /*
       // 公司名称需要超过 1个汉字（至少 4 个汉字）
       const chineseCharCount = (trimmedCompany.match(/[\u4e00-\u9fa5]/g) || []).length;
@@ -348,34 +416,145 @@ export default {
 
       this.form = {
         ...this.form,
+        blockName: this.form.blockName,
         name: trimmedName,
         mobile: trimmedMobile,
         unit: trimmedUnit,
         company: trimmedCompany,
-        subdate: trimmedSubdate
+        subdate: trimmedSubdate,
+        area: trimmedArea
       };
 
-      const formStore = useFormStore();
-
-      //console.log('OLD:',formStore.formData);
-
-      formStore.formData = { 
-        ...formStore.formData,
-        ...this.form
-      };
+      const formStore = this.syncBasicInfoToStore({
+        blockName: (this.form.blockName || '').trim(),
+        name: trimmedName,
+        mobile: trimmedMobile,
+        unit: trimmedUnit,
+        company: trimmedCompany,
+        subdate: trimmedSubdate,
+        area: trimmedArea
+      });
 
       console.log('Form Data:', formStore.formData);
-      
-      this.$router.push('/page6')
 
+      const submissionId = this.getSubmissionId();
 
+      this.submitting = true;
+      try {
+        const payload = submissionId
+          ? { ...formStore.formData, id: submissionId }
+          : { ...formStore.formData };
 
+        const response = await fetch(`${this.apiBase}/submit`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
 
+        if (!response.ok) {
+          const errText = await response.text();
+          this.showModal = true;
+          this.message = `提交失败(${response.status})：${errText || '请稍后重试'}`;
+          this.submitting = false;
+          return;
+        }
 
+        const result = await response.json();
+        const savedId = result?.id || submissionId || '';
+
+        if (savedId) {
+          formStore.formData = {
+            ...formStore.formData,
+            submissionId: savedId
+          };
+        }
+
+        this.$router.push({
+          path: '/page6',
+          query: savedId ? { id: savedId } : {}
+        })
+      } catch (error) {
+        console.error('Error:', error);
+        this.showModal = true;
+        this.message = `提交失败，请检查网络或稍后再试\n${error?.message || ''}`;
+        this.submitting = false;
+        return;
+      }
+
+      this.submitting = false;
     },
 
-    goBack() {
-      this.$router.push('/page4')
+    async goBack() {
+      if (this.submitting) {
+        return;
+      }
+
+      const trimmedBlockName = (this.form.blockName || '').trim();
+      const trimmedName = (this.form.name || '').trim();
+      const trimmedMobile = (this.form.mobile || '').trim();
+      const trimmedUnit = (this.form.unit || '').trim();
+      const trimmedCompany = (this.form.company || '').trim();
+      const trimmedSubdate = (this.form.subdate || '').trim();
+      const trimmedArea = (this.form.area || '').trim();
+
+      const formStore = this.syncBasicInfoToStore({
+        blockName: trimmedBlockName,
+        name: trimmedName,
+        mobile: trimmedMobile,
+        unit: trimmedUnit,
+        company: trimmedCompany,
+        subdate: trimmedSubdate,
+        area: trimmedArea
+      });
+      const submissionId = this.getSubmissionId();
+
+      this.submitting = true;
+      try {
+        const payload = submissionId
+          ? { ...formStore.formData, id: submissionId }
+          : { ...formStore.formData };
+
+        const response = await fetch(`${this.apiBase}/submit`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          const errText = await response.text();
+          this.showModal = true;
+          this.message = `提交失败(${response.status})：${errText || '请稍后重试'}`;
+          this.submitting = false;
+          return;
+        }
+
+        const result = await response.json();
+        const savedId = result?.id || submissionId || '';
+
+        if (savedId) {
+          formStore.formData = {
+            ...formStore.formData,
+            submissionId: savedId
+          };
+        }
+
+        this.$router.push({
+          path: '/page4',
+          query: savedId ? { id: savedId } : {}
+        })
+      } catch (error) {
+        console.error('Error:', error);
+        this.showModal = true;
+        this.message = `提交失败，请检查网络或稍后再试\n${error?.message || ''}`;
+        this.submitting = false;
+        return;
+      }
+
+      this.submitting = false;
     },
     openHomeConfirm() {
       this.showHomeConfirm = true;

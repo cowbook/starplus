@@ -142,7 +142,7 @@ import p8 from '../assets/b8.png'
 
 
 export default {
-  name: 'Page3',
+  name: 'Page26',
   data() {
     return {
       choice: "",
@@ -170,7 +170,18 @@ export default {
   },
   methods: {
     reset(){
-      this.$router.push('/page4')
+      
+      const formStore = useFormStore();
+
+      if (typeof formStore.$reset === 'function') {
+        formStore.$reset();
+      } else {
+        formStore.formData = {};
+        formStore.FormData = {};
+      }
+
+      localStorage.removeItem('form-temp-data');
+      window.location.replace('/page4');
     },
     
     async submitForm() {
@@ -184,7 +195,7 @@ export default {
           body: JSON.stringify({
             name: '',
             email: '',
-            feedback: formStore.step1Data.blockName
+            feedback: formStore.formData?.['物业'] || ''
           })
         })
         if (response.ok) {
@@ -204,7 +215,10 @@ export default {
        this.choice = name;
 
        const formStore = useFormStore();
-       formStore.step1Data = { blockName: name };
+       formStore.formData = {
+        ...(formStore.formData || {}),
+        '物业': name
+       };
 
        console.log("选择了", name);
        //this.submitForm();

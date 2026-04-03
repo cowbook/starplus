@@ -113,8 +113,7 @@
 
 
 
-      <div class="segment" v-if = "currentPage == 25">
-
+      <div class="segment segment-page25-actions" v-if = "currentPage == 25">
         <div class="row">
 
           <div class="blue-btn" @click="p6_goNext(-1)">
@@ -228,7 +227,7 @@ import bgLine from '../assets/page2_bg_horizontal_line.png'
 import notebook_icon from '../assets/page6_note.png'
 
 export default {
-  name: 'Page2',
+  name: 'Page6',
   data() {
     const hostname = window.location.hostname;
     const isLocalHost =
@@ -263,6 +262,7 @@ export default {
       showModal: false,
       showPreviewModal: false,
       showHomeConfirm: false,
+      savingStep: false,
       message: '',
       modalAction: '',
       previewRows: [],
@@ -1225,7 +1225,18 @@ export default {
     }
   },
   async mounted() {
+
+    const routeId = typeof this.$route?.query?.id === 'string' ? this.$route.query.id.trim() : '';
+    if (routeId) {
+      const formStore = useFormStore();
+      formStore.formData = {
+        ...(formStore.formData || {}),
+        submissionId: routeId
+      };
+    }
+
     await this.preloadPageImages();
+
     this.assetsReady = true;
 
     this.$nextTick(() => {
@@ -1235,6 +1246,7 @@ export default {
     });
 
     this.updatePageFromRoute();
+    
   },
   beforeUnmount() {
     document.body.style.overflow = '';
@@ -1247,7 +1259,16 @@ export default {
       this.updatePageFromRoute();
     }
   },
+
   methods: {
+
+    resolveSubmissionId() {
+      const routeId = typeof this.$route?.query?.id === 'string' ? this.$route.query.id.trim() : '';
+      const formStore = useFormStore();
+      const storeId = typeof formStore.formData?.submissionId === 'string' ? formStore.formData.submissionId.trim() : '';
+      return routeId || storeId;
+    },
+
     preloadPageImages() {
       const imageUrls = [
         this.logo,
@@ -1283,6 +1304,14 @@ export default {
     updatePageFromRoute() {
 
       const formStore = useFormStore();
+      const submissionId = this.resolveSubmissionId();
+
+      if (submissionId) {
+        formStore.formData = {
+          ...(formStore.formData || {}),
+          submissionId
+        };
+      }
 
       const path = this.$route.path;
       // 获取路由最后1个字符作为currentPage
@@ -1330,8 +1359,27 @@ export default {
     },
     //比如标题是 1.1 客服/礼宾台员工仪容仪表，应该排在 1.2 晨间迎宾服务及指引前面
     compareQuestionKey(a, b) {
+
+      //console.log('比较题目:', a, b);
+
+      var no_num_order= ['物业','姓名','手机号','单元','公司','调查日期','区域'];
+
+      if(no_num_order.includes(a) &&  no_num_order.includes(b)) {
+        //console.log(no_num_order.indexOf(b), no_num_order.indexOf(a));
+        return no_num_order.indexOf(a) - no_num_order.indexOf(b);
+
+      }
+
+
+      if (no_num_order.includes(a) && !no_num_order.includes(b)) return -1;
+      if (!no_num_order.includes(a) && no_num_order.includes(b)) return 1;
+
+
+
       const matchA = String(a).match(/^(\d+(?:\.\d+)*)/);
       const matchB = String(b).match(/^(\d+(?:\.\d+)*)/);
+
+      
 
       if (matchA && matchB) {
         const partsA = matchA[1].split('.').map(Number);
@@ -1351,88 +1399,13 @@ export default {
 
       if (matchA && !matchB) return -1;
       if (!matchA && matchB) return 1;
+
       return String(a).localeCompare(String(b), 'zh-Hans-CN');
     },
+
     normalizeFormattedValue(value) {
       if (Array.isArray(value)) {
-        return value.join('，');
-      }
-
-      if (value == null) {
-        return '';
-      }
-
-      if (typeof value === 'string') {
-        return value.trim();
-      }
-
-      return String(value);
-    },
-    formatData(){
-      // 本函数在提交前对数据做统一格式化：
-      // 1. 合并当前页面还未点“下一页”的即时选择
-      // 2. 多选数组转为逗号分隔字符串
-      // 3. 英文字段名转为中文
-      // 4. 题目按数字编号排序（如 1.1, 1.2, 2.1）
-      const formStore = useFormStore();
-
-      const mergedData = {
-        ...(formStore.formData || {})
-      };
-
-      for (const item of this.page.items) {
-        mergedData[item.title] = item.value;
-      }
-
-      const fieldLabelMap = {
-        blockName: '物业',
-        name: '姓名',
-        mobile: '手机号',
-        area:'区域',
-        unit: '单元',
-        company: '公司名称',
-        subdate: '调查日期',
-      };
-
-      const basicFieldOrder = ['blockName', 'name', 'mobile', 'area', 'unit', 'company', 'subdate'];
-
-      const entries = [];
-      const usedKeySet = new Set();
-
-      for (const key of basicFieldOrder) {
-        if (Object.prototype.hasOwnProperty.call(mergedData, key)) {
-          entries.push([fieldLabelMap[key] || key, this.normalizeFormattedValue(mergedData[key])]);
-          usedKeySet.add(key);
-        }
-      }
-
-      const questionKeys = Object.keys(mergedData)
-        .filter((key) => !usedKeySet.has(key))
-        .sort((a, b) => this.compareQuestionKey(a, b));
-
-      for (const key of questionKeys) {
-        entries.push([fieldLabelMap[key] || key, this.normalizeFormattedValue(mergedData[key])]);
-      }
-
-      return Object.fromEntries(entries);
-    },
-    PreviewForm() {
-      const formattedData = this.formatData();
-      const rows = Object.entries(formattedData).map(([question, answer]) => ({
-        question,
-        answer: this.formatPreviewAnswer(answer)
-      }));
-
-      this.previewRows = rows;
-      this.showPreviewModal = true;
-      this.updateBodyScrollLock();
-      console.log('预览表单数据:', formattedData);
-      
-    },
-
-    formatPreviewAnswer(value) {
-      if (Array.isArray(value)) {
-        return value.length > 0 ? value.join('、') : '未作答';
+        return value.length > 0 ? value.join(',') : '未作答';
       }
 
       if (typeof value === 'string') {
@@ -1444,8 +1417,61 @@ export default {
         return '未作答';
       }
 
+
       return String(value);
     },
+
+    formatData(){
+
+      this.pageCache();
+
+      // 本函数在提交前对数据做统一格式化：
+      // 1. 合并当前页面还未点“下一页”的即时选择
+      // 2. 多选数组转为逗号分隔字符串
+      // 3. 英文字段名转为中文
+      // 4. 题目按数字编号排序（如 1.1, 1.2, 2.1）
+      const formStore = useFormStore();
+
+      const mergedData = {
+        ...(formStore.formData || {})
+      };
+
+  
+      const entries = [];
+
+      const questionKeys = Object.keys(mergedData)
+        .filter((key) => key !== 'submissionId')
+        .sort((a, b) => this.compareQuestionKey(a, b));
+
+      for (const key of questionKeys) {
+        entries.push([key, this.normalizeFormattedValue(mergedData[key])]);
+      }
+
+      //console.log('Formatted Data Entries:', Object.fromEntries(entries));
+
+      return Object.fromEntries(entries);
+
+
+    },
+    PreviewForm() {
+
+      const formattedData = this.formatData();
+
+      const rows = Object.entries(formattedData).map(([question, answer]) => ({
+        question,
+        answer: answer
+      }));
+
+      this.previewRows = rows;
+
+      this.showPreviewModal = true;
+      this.updateBodyScrollLock();
+      console.log('预览表单数据:', formattedData);
+      
+    },
+
+  
+
     updateBodyScrollLock() {
       if (this.showModal || this.showPreviewModal || this.showHomeConfirm) {
         document.body.style.overflow = 'hidden';
@@ -1496,7 +1522,7 @@ export default {
       }
     },
 
-    p6_goNext(n) {
+    pageCache(){
 
       const formStore = useFormStore();
 
@@ -1540,13 +1566,72 @@ export default {
 
         formStore.formData[item.title] = item.value;
       }
+    },
 
-      
-      this.currentPage += n;
+    async p6_goNext(n) {
 
-      console.log('Form Data:', formStore.formData);
+      if (this.savingStep) {
+        return;
+      }
 
-      this.$router.push('/page'  + this.currentPage)
+      this.pageCache();
+
+
+      const formStore = useFormStore();
+
+      // 确保 formStore.formData 存在
+      if (!formStore.formData) {
+        formStore.formData = {};
+      }
+
+
+      const submissionId = this.resolveSubmissionId();
+      this.savingStep = true;
+      try {
+        const payload = submissionId
+          ? { ...formStore.formData, id: submissionId }
+          : { ...formStore.formData };
+
+        const response = await fetch(`${this.apiBase}/submit`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          const errText = await response.text();
+          this.openModal(`保存失败(${response.status})：${errText || '请稍后重试'}`);
+          this.savingStep = false;
+          return;
+        }
+
+        const result = await response.json();
+        const savedId = result?.id || submissionId || '';
+
+        if (savedId) {
+          formStore.formData = {
+            ...(formStore.formData || {}),
+            submissionId: savedId
+          };
+        }
+
+        this.currentPage += n;
+
+        this.$router.push({
+          path: '/page' + this.currentPage,
+          query: savedId ? { id: savedId } : {}
+        })
+
+      } catch (error) {
+        console.error('Error:', error)
+        this.openModal(`保存失败，请检查网络或稍后再试\n${error?.message || ''}`)
+        this.savingStep = false;
+        return;
+      }
+
+      this.savingStep = false;
       
    
 
@@ -1560,7 +1645,10 @@ export default {
     async submitForm() {
 
       const formattedData = this.formatData();
-      const formStore = useFormStore();
+      const submissionId = this.resolveSubmissionId();
+      const payload = submissionId
+        ? { ...formattedData, id: submissionId }
+        : formattedData;
 
       try {
         const response = await fetch(`${this.apiBase}/submit`, {
@@ -1568,10 +1656,22 @@ export default {
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(formattedData)
+          body: JSON.stringify(payload)
         })
         if (response.ok) {
-          formStore.clearFormData();
+          const result = await response.json();
+          const savedId = result?.id || '';
+
+          if (savedId) {
+            const formStore = useFormStore();
+            formStore.formData = {
+              ...(formStore.formData || {}),
+              submissionId: savedId
+            };
+          }
+
+          localStorage.removeItem('form-temp-data');
+
           this.openModal('提交成功！', 'goPage26');
 
         } else {
@@ -1889,6 +1989,21 @@ export default {
 .inner-slide-right-leave-to {
   transform: translateX(24px);
   opacity: 0;
+}
+
+@keyframes slide-in-from-right {
+  from {
+    transform: translateX(60px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.segment-page25-actions {
+  animation: slide-in-from-right 0.5s ease 1s both;
 }
 
 .row{

@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const { exec } = require('child_process');
 const { promisify } = require('util');
 require('dotenv').config();
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 const XLSX = require('xlsx');
 
 const app = express();
@@ -225,8 +225,66 @@ apiRouter.post('/submit', async (req, res) => {
   }
 
   try {
+    const inputId = typeof submission.id === 'string'
+      ? submission.id.trim()
+      : typeof submission.submissionId === 'string'
+        ? submission.submissionId.trim()
+        : '';
+
+    const { id: ignoredId, submissionId: ignoredSubmissionId, ...rawSubmission } = submission;
+
+    if (inputId) {
+      if (!ObjectId.isValid(inputId)) {
+        return res.status(400).json({ error: 'Invalid submission id' });
+      }
+
+      const filter = { _id: new ObjectId(inputId) };
+      const existing = await submissionsCollection.findOne(filter);
+      if (!existing) {
+        return res.status(404).json({ error: 'Submission not found' });
+      }
+
+      const incomingData = normalizeSubmission(rawSubmission);
+      const replacement = {
+        ...existing,
+        ...incomingData,
+        ip: getClientIp(req),
+        updatedAt: formatShanghaiDateTime()
+      };
+
+      // Clean up malformed nested keys that were previously created by $set path parsing.
+      for (const key of Object.keys(incomingData)) {
+        if (!key.includes('.')) {
+          continue;
+        }
+
+        const prefix = key.split('.')[0];
+        if (
+          Object.prototype.hasOwnProperty.call(replacement, prefix) &&
+          replacement[prefix] &&
+          typeof replacement[prefix] === 'object' &&
+          !Array.isArray(replacement[prefix])
+        ) {
+          delete replacement[prefix];
+        }
+      }
+
+      delete replacement._id;
+      await submissionsCollection.replaceOne(filter, replacement);
+
+      const saved = await submissionsCollection.findOne(filter);
+      return res.json({
+        message: 'Submission updated',
+        id: inputId,
+        data: {
+          id: inputId,
+          ...(saved || document)
+        }
+      });
+    }
+
     const document = {
-      ...normalizeSubmission(submission),
+      ...normalizeSubmission(rawSubmission),
       createdAt: formatShanghaiDateTime(),
       ip: getClientIp(req)
     };
@@ -235,7 +293,15 @@ apiRouter.post('/submit', async (req, res) => {
       ...document
     });
 
-    return res.json({ message: 'Submission saved', id: result.insertedId });
+    const id = result.insertedId?.toString?.() || String(result.insertedId);
+    return res.json({
+      message: 'Submission saved',
+      id,
+      data: {
+        id,
+        ...document
+      }
+    });
   } catch (err) {
     console.error('Error writing to database:', err);
     return res.status(500).json({ error: 'Failed to save submission' });
