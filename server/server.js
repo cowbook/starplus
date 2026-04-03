@@ -645,11 +645,11 @@ apiRouter.get('/download', requireAdmin, async (req, res) => {
       });
     }
 
-    // Keep stable column order: id, createdAt, ip first.
-    // Non-numbered fields keep first appearance order; numbered fields (e.g. 1.1, 1.2) are sorted.
-    const fixedHeaders = ['id', 'createdAt', 'ip'];
-    const dynamicHeaders = [];
-    const headerSet = new Set(fixedHeaders);
+  // Keep stable column order: id, ip, createdAt, updatedAt first.
+  // Non-numbered fields keep first appearance order; numbered fields (e.g. 1.1, 1.2) are sorted.
+  const fixedHeaders = ['id', 'ip', 'createdAt', 'updatedAt'];
+  const dynamicHeaders = [];
+  const headerSet = new Set(fixedHeaders);
 
     for (const row of rows) {
       for (const key of Object.keys(row)) {
@@ -679,12 +679,14 @@ apiRouter.get('/download', requireAdmin, async (req, res) => {
     const exportRows = rows.map((row) => {
       const result = {
         id: String(row._id),
+        ip: row.ip || '',
         createdAt: row.createdAt || '',
-        ip: row.ip || ''
+        updatedAt: row.updatedAt || ''
+
       };
 
       for (const key of orderedHeaders) {
-        if (key === 'id' || key === 'createdAt' || key === 'ip') {
+        if (key === 'id' || key === 'createdAt' || key === 'ip' || key === 'updatedAt') {
           continue;
         }
         result[key] = normalizeExportValue(row[key]);

@@ -344,27 +344,8 @@ export default {
       confirmPassword: '',
       changingPassword: false,
       passwordChangeError: '',
-      passwordChangeSuccess: '',
-      fieldLabels: {
-        '姓名': '姓名',
-        'name': '姓名',
-        '区域': '区域',
-        'area': '区域',
-        '1.1 整体满意度': '整体满意度',
-        '1.1整体满意度': '整体满意度',
-        '1.2 服务满意度': '服务满意度',
-        '1.2服务满意度': '服务满意度',
-        '1.3 环境满意度': '环境满意度',
-        '1.3环境满意度': '环境满意度',
-        '2.1 整体评价': '整体评价',
-        '2.1整体评价': '整体评价',
-        '3.1 感受': '感受',
-        '3.1感受': '感受',
-        '4.1 更多信息': '更多信息',
-        '4.1更多信息': '更多信息',
-        '物业': '物业',
-        'property': '物业'
-      }
+      passwordChangeSuccess: ''
+      
     }
   },
   mounted() {
@@ -422,6 +403,70 @@ export default {
     }
   },
   methods: {
+
+    //比如标题是 1.1 客服/礼宾台员工仪容仪表，应该排在 1.2 晨间迎宾服务及指引前面
+    compareQuestionKey(a, b) {
+
+
+      var no_num_order= ['ip','createdAt','updatedAt','物业','姓名','手机号','单元','公司','调查日期','区域'];
+
+      if(no_num_order.includes(a) &&  no_num_order.includes(b)) {
+        return no_num_order.indexOf(a) - no_num_order.indexOf(b);
+
+      }
+
+
+      if (no_num_order.includes(a) && !no_num_order.includes(b)) return -1;
+      if (!no_num_order.includes(a) && no_num_order.includes(b)) return 1;
+
+
+
+      const matchA = String(a).match(/^(\d+(?:\.\d+)*)/);
+      const matchB = String(b).match(/^(\d+(?:\.\d+)*)/);
+
+      
+
+      if (matchA && matchB) {
+        const partsA = matchA[1].split('.').map(Number);
+        const partsB = matchB[1].split('.').map(Number);
+        const maxLen = Math.max(partsA.length, partsB.length);
+
+        for (let i = 0; i < maxLen; i += 1) {
+          const valueA = partsA[i] ?? -1;
+          const valueB = partsB[i] ?? -1;
+          if (valueA !== valueB) {
+            return valueA - valueB;
+          }
+        }
+
+        return String(a).localeCompare(String(b), 'zh-Hans-CN');
+      }
+
+      if (matchA && !matchB) return -1;
+      if (!matchA && matchB) return 1;
+
+      return String(a).localeCompare(String(b), 'zh-Hans-CN');
+    },
+
+    formatData(mergedData){
+
+
+      const entries = [];
+
+      const questionKeys = Object.keys(mergedData)
+        .filter((key) => key !== 'submissionId')
+        .sort((a, b) => this.compareQuestionKey(a, b));
+
+      for (const key of questionKeys) {
+        entries.push([key, mergedData[key]]);
+      }
+
+
+      return Object.fromEntries(entries);
+
+
+    },
+    
     buildApiUrl(endpoint) {
       const base = this.apiBase.endsWith('/') ? this.apiBase.slice(0, -1) : this.apiBase
       const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`
@@ -741,8 +786,9 @@ export default {
     getEntries(item) {
       return Object.entries(item)
         .filter(([key]) => key !== '_id' && key !== 'id')
+        .sort(([keyA], [keyB]) => this.compareQuestionKey(keyA, keyB))
         .map(([key, value]) => {
-          const displayKey = this.fieldLabels[key] || key
+          const displayKey =  key
           return { key: displayKey, value }
         })
     },
@@ -1429,6 +1475,11 @@ export default {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+
+  z-index: 1000;
+    position: absolute;
+    top: 30px;
+    
 }
 
 .detail-modal-header {
