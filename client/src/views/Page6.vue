@@ -256,9 +256,6 @@ export default {
       bgLeft,
       bgRight,
       bgLine,
-      form: {
-
-      },
       showModal: false,
       showPreviewModal: false,
       showHomeConfirm: false,
@@ -1261,8 +1258,10 @@ export default {
   },
 
   methods: {
-
+    
     resolveSubmissionId() {
+      // 优先从路由参数获取 submissionId，如果没有再从 store 获取
+
       const routeId = typeof this.$route?.query?.id === 'string' ? this.$route.query.id.trim() : '';
       const formStore = useFormStore();
       const storeId = typeof formStore.formData?.submissionId === 'string' ? formStore.formData.submissionId.trim() : '';
@@ -1313,6 +1312,10 @@ export default {
         };
       }
 
+
+
+      
+
       const path = this.$route.path;
       // 获取路由最后1个字符作为currentPage
       this.currentPage = parseInt(path.replace(/^\//, '').replace('page', '')) || 6;
@@ -1320,11 +1323,6 @@ export default {
       // 更新页面数据
       const currentPageKey = path.replace(/^\//, '');
       this.page = this.pages[currentPageKey] || this.page;
-
-      this.form = { 
-        ...formStore.formData,
-        ...this.form
-      };
 
       this.questionIndex = 0;
 
@@ -1346,8 +1344,8 @@ export default {
         }
 
         // 不能用 truthy 判断，否则空字符串会被误判为“没有值”
-        if (Object.prototype.hasOwnProperty.call(this.form, item.title)) {
-          item.value = this.form[item.title];
+        if (Object.prototype.hasOwnProperty.call(formStore.formData || {}, item.title)) {
+          item.value = formStore.formData[item.title];
         }
 
       }
