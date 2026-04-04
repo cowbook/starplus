@@ -45,6 +45,22 @@ function normalizeSubmission(submission) {
   );
 }
 
+function serializeSubmissionForClient(submission) {
+  if (!submission || typeof submission !== 'object') {
+    return {};
+  }
+
+  const {
+    _id,
+    ip,
+    createdAt,
+    updatedAt,
+    ...rest
+  } = submission;
+
+  return normalizeSubmission(rest);
+}
+
 function getClientIp(req) {
   const forwardedFor = req.headers['x-forwarded-for'];
 
@@ -177,6 +193,7 @@ function normalizeExportValue(value) {
 }
 
 function parseNumberedHeaderKey(key) {
+  
   const text = String(key || '').trim();
   const match = text.match(/^(\d+(?:\.\d+)+)/);
   if (!match) {
@@ -192,15 +209,18 @@ function parseNumberedHeaderKey(key) {
 }
 
 function compareNumberedHeaderKeys(a, b) {
+
   const aParts = parseNumberedHeaderKey(a);
   const bParts = parseNumberedHeaderKey(b);
 
   if (!aParts && !bParts) {
     return String(a).localeCompare(String(b), 'zh-CN');
   }
+
   if (!aParts) {
     return 1;
   }
+
   if (!bParts) {
     return -1;
   }
@@ -215,9 +235,11 @@ function compareNumberedHeaderKeys(a, b) {
   }
 
   return String(a).localeCompare(String(b), 'zh-CN');
+
 }
 
 apiRouter.post('/submit', async (req, res) => {
+
   const submission = req.body;
 
   if (!submission || typeof submission !== 'object' || Object.keys(submission).length === 0) {
@@ -278,10 +300,11 @@ apiRouter.post('/submit', async (req, res) => {
         id: inputId,
         data: {
           id: inputId,
-          ...(saved || document)
+          ...serializeSubmissionForClient(saved || {})
         }
       });
     }
+
 
     const document = {
       ...normalizeSubmission(rawSubmission),
@@ -289,9 +312,11 @@ apiRouter.post('/submit', async (req, res) => {
       ip: getClientIp(req)
     };
 
+
     const result = await submissionsCollection.insertOne({
       ...document
     });
+
 
     const id = result.insertedId?.toString?.() || String(result.insertedId);
     return res.json({
@@ -299,12 +324,37 @@ apiRouter.post('/submit', async (req, res) => {
       id,
       data: {
         id,
-        ...document
+        ...serializeSubmissionForClient(document)
       }
     });
+
   } catch (err) {
     console.error('Error writing to database:', err);
     return res.status(500).json({ error: 'Failed to save submission' });
+  }
+});
+
+apiRouter.get('/submit/:id', async (req, res) => {
+  const inputId = typeof req.params?.id === 'string' ? req.params.id.trim() : '';
+
+  if (!inputId || !ObjectId.isValid(inputId)) {
+    return res.status(400).json({ error: 'Invalid submission id' });
+  }
+
+  try {
+    const submission = await submissionsCollection.findOne({ _id: new ObjectId(inputId) });
+
+    if (!submission) {
+      return res.status(404).json({ error: 'Submission not found' });
+    }
+
+    return res.json({
+      id: inputId,
+      data: serializeSubmissionForClient(submission)
+    });
+  } catch (error) {
+    console.error('Error reading submission by id:', error);
+    return res.status(500).json({ error: 'Failed to read submission' });
   }
 });
 

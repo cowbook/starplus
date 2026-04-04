@@ -259,6 +259,8 @@ export default {
       showModal: false,
       showPreviewModal: false,
       showHomeConfirm: false,
+      hydratedSubmissionId: '',
+      hydratingSubmissionId: '',
       savingStep: false,
       message: '',
       modalAction: '',
@@ -1232,7 +1234,12 @@ export default {
       };
     }
 
-    await this.preloadPageImages();
+    await Promise.all([
+      this.preloadPageImages(),
+      this.hydrateFormStoreFromServer(routeId)
+    ]);
+
+    this.updatePageFromRoute();
 
     this.assetsReady = true;
 
@@ -1242,17 +1249,24 @@ export default {
       }, 200);
     });
 
-    this.updatePageFromRoute();
-    
   },
   beforeUnmount() {
     document.body.style.overflow = '';
   },
   watch: {
-    '$route'(to, from) {
+    async '$route'(to, from) {
       const toPage = this.parseRoutePageNumber(to.path);
       const fromPage = this.parseRoutePageNumber(from?.path || '');
       this.innerTransitionName = toPage < fromPage ? 'inner-slide-right' : 'inner-slide-left';
+
+      const toId = typeof to?.query?.id === 'string' ? to.query.id.trim() : '';
+      const fromId = typeof from?.query?.id === 'string' ? from.query.id.trim() : '';
+
+      if (toId) {
+     
+        await this.hydrateFormStoreFromServer(toId);
+      }
+
       this.updatePageFromRoute();
     }
   },
@@ -1266,6 +1280,110 @@ export default {
       const formStore = useFormStore();
       const storeId = typeof formStore.formData?.submissionId === 'string' ? formStore.formData.submissionId.trim() : '';
       return routeId || storeId;
+    },
+
+    shouldHydrateFromServer(storeData, submissionId) {
+      const currentSubmissionId = typeof storeData?.submissionId === 'string' ? storeData.submissionId.trim() : '';
+      const keys = Object.keys(storeData || {}).filter((key) => key !== 'submissionId');
+      const currentPageKey = this.$route.path.replace(/^\//, '');
+      const currentPageItems = this.pages[currentPageKey]?.items || [];
+      const hasMissingCurrentPageField = currentPageItems.some(
+        (item) => !Object.prototype.hasOwnProperty.call(storeData || {}, item.title)
+      );
+
+      if (!submissionId) {
+        return false;
+      }
+
+      if (currentSubmissionId && currentSubmissionId !== submissionId) {
+        return true;
+      }
+
+      if (this.hydratingSubmissionId === submissionId) {
+        return false;
+      }
+
+      if (hasMissingCurrentPageField) {
+        return true;
+      }
+
+      if (this.hydratedSubmissionId === submissionId) {
+        return false;
+      }
+
+      if (keys.length === 0) {
+        return true;
+      }
+
+      return false;
+    },
+
+    mergeServerDataIntoStore(serverData, submissionId) {
+      const formStore = useFormStore();
+      const currentData = formStore.formData || {};
+      const currentSubmissionId = typeof currentData.submissionId === 'string' ? currentData.submissionId.trim() : '';
+
+      if (currentSubmissionId && currentSubmissionId !== submissionId) {
+        formStore.formData = {
+          ...serverData,
+          submissionId
+        };
+        return;
+      }
+
+      const mergedData = {
+        ...currentData,
+        submissionId
+      };
+
+      for (const [key, value] of Object.entries(serverData || {})) {
+        if (!Object.prototype.hasOwnProperty.call(currentData, key)) {
+          mergedData[key] = value;
+        }
+      }
+
+      formStore.formData = mergedData;
+    },
+
+    async hydrateFormStoreFromServer(submissionId = this.resolveSubmissionId()) {
+      const normalizedId = typeof submissionId === 'string' ? submissionId.trim() : '';
+      const formStore = useFormStore();
+      const currentData = formStore.formData || {};
+      const currentSubmissionId = typeof currentData.submissionId === 'string' ? currentData.submissionId.trim() : '';
+
+      if (!this.shouldHydrateFromServer(currentData, normalizedId)) {
+        return;
+      }
+
+      this.hydratingSubmissionId = normalizedId;
+
+      try {
+        const response = await fetch(`${this.apiBase}/submit/${normalizedId}`);
+
+        if (!response.ok) {
+          if (response.status === 404 && currentSubmissionId && currentSubmissionId !== normalizedId) {
+            formStore.formData = {
+              submissionId: normalizedId
+            };
+          }
+
+          if (response.status !== 404) {
+            console.warn('根据 submissionId 拉取问卷失败:', response.status);
+          }
+          return;
+        }
+
+        const result = await response.json();
+        const remoteData = result?.data && typeof result.data === 'object' ? result.data : {};
+        this.mergeServerDataIntoStore(remoteData, normalizedId);
+        this.hydratedSubmissionId = normalizedId;
+      } catch (error) {
+        console.warn('根据 submissionId 拉取问卷异常:', error);
+      } finally {
+        if (this.hydratingSubmissionId === normalizedId) {
+          this.hydratingSubmissionId = '';
+        }
+      }
     },
 
     preloadPageImages() {
@@ -1332,6 +1450,10 @@ export default {
           this.questionIndex += this.pages[page].items.length; 
          }
       }
+
+
+
+      
 
 
       for(const item of this.page.items) {
