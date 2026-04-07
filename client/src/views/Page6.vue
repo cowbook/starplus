@@ -1541,9 +1541,13 @@ export default {
       return String(value);
     },
 
-    formatData(){
+    formatData(options = {}){
 
-      this.pageCache();
+      const { requireComplete = false } = options;
+
+      if (requireComplete && !this.pageCache()) {
+        return null;
+      }
 
       // 本函数在提交前对数据做统一格式化：
       // 1. 合并当前页面还未点“下一页”的即时选择
@@ -1681,11 +1685,13 @@ export default {
 
         if (required){
           this.openModal('请先完成本页问卷再继续');
-          return;
+          return false;
         }
 
         formStore.formData[item.title] = item.value;
       }
+
+      return true;
     },
 
     async p6_goNext(n) {
@@ -1694,7 +1700,9 @@ export default {
         return;
       }
 
-      this.pageCache();
+      if (!this.pageCache()) {
+        return;
+      }
 
 
       const formStore = useFormStore();
@@ -1764,7 +1772,10 @@ export default {
 
     async submitForm() {
 
-      const formattedData = this.formatData();
+      const formattedData = this.formatData({ requireComplete: true });
+      if (!formattedData) {
+        return;
+      }
       const submissionId = this.resolveSubmissionId();
       const payload = submissionId
         ? { ...formattedData, id: submissionId }
