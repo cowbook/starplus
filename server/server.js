@@ -7,6 +7,7 @@ const { promisify } = require('util');
 require('dotenv').config();
 const { MongoClient, ObjectId } = require('mongodb');
 const XLSX = require('xlsx');
+const multer = require('multer');
 
 const app = express();
 const apiRouter = express.Router();
@@ -20,6 +21,12 @@ const ADMIN_KEY = process.env.ADMIN_KEY || 'change-this-admin-key';
 const SUPERADMIN_BACKDOOR = typeof process.env.superadmin === 'string' ? process.env.superadmin.trim() : '';
 const execAsync = promisify(exec);
 const ANSWER_OPTIONS = ['非常不满意', '不满意', '一般', '满意', '非常满意'];
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 20 * 1024 * 1024
+  }
+});
 let webhookBuildRunning = false;
 
 let submissionsCollection;
@@ -759,6 +766,104 @@ apiRouter.get('/download', requireAdmin, async (req, res) => {
   } catch (err) {
     console.error('Error generating xlsx export:', err);
     return res.status(500).json({ error: 'Failed to generate xlsx export' });
+  }
+});
+
+apiRouter.post('/import', requireAdmin, upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file || !req.file.buffer) {
+      return res.status(400).json({ error: 'Excel file is required' });
+    }
+
+    let workbook;
+    try {
+      workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+    } catch (error) {
+      return res.status(400).json({ error: 'Invalid Excel file' });
+    }
+
+    const firstSheetName = workbook.SheetNames?.[0];
+    if (!firstSheetName) {
+      return res.status(400).json({ error: 'Excel has no sheets' });
+    }
+
+    const worksheet = workbook.Sheets[firstSheetName];
+    const rows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+
+    if (!Array.isArray(rows) || rows.length === 0) {
+      return res.status(400).json({ error: 'Excel has no data rows' });
+    }
+
+    let updated = 0;
+    let skippedEmptyId = 0;
+    let skippedInvalidId = 0;
+    let skippedNotFound = 0;
+
+    for (const row of rows) {
+      const rawId = typeof row.id === 'string' ? row.id.trim() : String(row.id || '').trim();
+
+      if (!rawId) {
+        skippedEmptyId += 1;
+        continue;
+      }
+
+      if (!ObjectId.isValid(rawId)) {
+        skippedInvalidId += 1;
+        continue;
+      }
+
+      const filter = { _id: new ObjectId(rawId) };
+      const existing = await submissionsCollection.findOne(filter);
+
+      if (!existing) {
+        skippedNotFound += 1;
+        continue;
+      }
+
+      const { id: ignoredId, _id: ignoredMongoId, ...incomingRawData } = row;
+      const incomingData = normalizeSubmission(incomingRawData);
+
+      const replacement = {
+        ...existing,
+        ...incomingData,
+        updatedAt: formatShanghaiDateTime()
+      };
+
+      // Keep literal keys containing dots, and remove malformed nested objects if present.
+      for (const key of Object.keys(incomingData)) {
+        if (!key.includes('.')) {
+          continue;
+        }
+
+        const prefix = key.split('.')[0];
+        if (
+          Object.prototype.hasOwnProperty.call(replacement, prefix) &&
+          replacement[prefix] &&
+          typeof replacement[prefix] === 'object' &&
+          !Array.isArray(replacement[prefix])
+        ) {
+          delete replacement[prefix];
+        }
+      }
+
+      delete replacement._id;
+      await submissionsCollection.replaceOne(filter, replacement);
+      updated += 1;
+    }
+
+    return res.json({
+      message: 'Import completed',
+      summary: {
+        totalRows: rows.length,
+        updated,
+        skippedEmptyId,
+        skippedInvalidId,
+        skippedNotFound
+      }
+    });
+  } catch (error) {
+    console.error('Error importing xlsx:', error);
+    return res.status(500).json({ error: 'Failed to import xlsx' });
   }
 });
 
